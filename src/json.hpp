@@ -265,6 +265,82 @@ class basic_json
 
     /// @}
 
+  public:
+    /////////////////////////////
+    // user-defined exceptions //
+    /////////////////////////////
+
+    /// @name exception types
+    /// Classes for exceptions used by the library functions.
+    /// @{
+
+    /*!
+    @brief a user-defined exception class
+
+    To implement user-defined exceptions for the library, this class is used
+    as subclass for different exception types. Compared to `std::exception`,
+    the class also contains an error code to better reference and document
+    exceptions.
+
+    error code | exception type | message | description
+    ---------- | -------------- | ------- | -----------
+     1 | @ref invalid_iterator | "iterators are not compatible" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
+     2 | @ref invalid_iterator | "iterators do not fit current value" | Either iterator passed to function @ref erase(InteratorType first, InteratorType last) does not belong to the JSON value from which values shall be erased. It hence does not define a valid range to delete values from.
+     3 | @ref invalid_iterator | "iterator does not fit current value" | In an erase or insert function, the passed iterator @a pos does not belong to the JSON value for which the function was called. It hence does not define a valid position for the deletion/insertion.
+     4 | @ref invalid_iterator | "iterators out of range" | When an iterator range for a primitive type (number, boolean, or string) is passed to a constructor or an erase function, this range has to be exactly (@ref begin(), @ref end()), because this is the only way the single stored value is expressed. All other ranges are invalid.
+     5 | @ref invalid_iterator | "iterator out of range" | When an iterator for a primitive type (number, boolean, or string) is passed to an erase function, the iterator has to be the @ref begin() iterator, because it is the only way to address the stored value. All other iterators are invalid.
+     6 | @ref invalid_iterator | "cannot construct with iterators from null" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) belong to a JSON null value and hence to not define a valid range.
+     7 | @ref invalid_iterator | "cannot use key() for non-object iterators" | The key() member function can only be used on iterators belonging to a JSON object, because other types do not have a concept of a key.
+     8 | @ref invalid_iterator | "cannot use operator[] for object iterators" | The operator[] to specify a concrete offset cannot be used on iterators belonging to a JSON object, because JSON objects are unordered.
+     9 | @ref invalid_iterator | "cannot use offsets with object iterators" | The offset operators (+, -, +=, -=) cannot be used on iterators belonging to a JSON object, because JSON objects are unordered.
+    10 | @ref invalid_iterator | "iterators do not fit" | The iterator range passed to the insert function are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
+    11 | @ref invalid_iterator | "passed iterators may not belong to container" | The iterator range passed to the insert function must not be a subrange of the container to insert to.
+    12 | @ref invalid_iterator | "cannot compare iterators of different containers" | When two iterators are compared, they must belong to the same container.
+    13 | @ref invalid_iterator | "cannot compare order of object iterators" | The order of object iterators cannot be compated, because JSON objects are unordered.
+    14 | @ref invalid_iterator | "cannot get value" | Cannot get value for iterator: Either the iterator belongs to a null value or it is an iterator to a primitive type (number, boolean, or string), but the iterator is different to @ref begin().
+    */
+    class exception : public std::exception
+    {
+      public:
+        /*!
+        @brief create a user-defined exception with description and error code
+
+        @param[in] what_arg a description for the exception
+        @param[in] error_code a code for the exception (optional)
+        */
+        exception(const std::string& what_arg, int error_code = -1)
+            : std::exception(),
+              message("[except." + std::to_string(error_code) + "] " + what_arg),
+              ecode(error_code)
+        {}
+
+        /// returns the explanatory string
+        const char* what() const noexcept
+        {
+            return message.c_str();
+        }
+
+        /// returns the error code
+        int error_code() const noexcept
+        {
+            return ecode;
+        }
+
+      private:
+        /// the explanatory string for the exception
+        const std::string message {};
+        /// the error code of the exception
+        const int ecode = -1;
+    };
+
+    /// class for iterator-related exceptions
+    class invalid_iterator : public exception
+    {
+        using exception::exception;
+    };
+
+    /// @}
+
 
     /*!
     @brief returns the allocator associated with the container
@@ -1749,14 +1825,15 @@ class basic_json
     @param[in] first begin of the range to copy from (included)
     @param[in] last end of the range to copy from (excluded)
 
-    @throw std::domain_error if iterators are not compatible; that is, do not
-    belong to the same JSON value; example: `"iterators are not compatible"`
-    @throw std::out_of_range if iterators are for a primitive type (number,
+    @throw invalid_iterator (1) if iterators are not compatible; that is, do
+    not belong to the same JSON value; example: `"iterators are not
+    compatible"`
+    @throw invalid_iterator (4) if iterators are for a primitive type (number,
     boolean, or string) where an out of range error can be detected easily;
     example: `"iterators out of range"`
     @throw std::bad_alloc if allocation for object, array, or string fails
-    @throw std::domain_error if called with a null value; example: `"cannot
-    use construct with iterators from null"`
+    @throw invalid_iterator (6) if called with a null value; example: `"cannot
+    construct with iterators from null"`
 
     @complexity Linear in distance between @a first and @a last.
 
@@ -1776,7 +1853,7 @@ class basic_json
         // make sure iterator fits the current value
         if (first.m_object != last.m_object)
         {
-            throw std::domain_error("iterators are not compatible");
+            throw invalid_iterator("iterators are not compatible", 1);
         }
 
         // check if iterator range is complete for primitive values
@@ -1790,7 +1867,7 @@ class basic_json
             {
                 if (not first.m_it.primitive_iterator.is_begin() or not last.m_it.primitive_iterator.is_end())
                 {
-                    throw std::out_of_range("iterators out of range");
+                    throw invalid_iterator("iterators out of range", 4);
                 }
                 break;
             }
@@ -1853,7 +1930,8 @@ class basic_json
             default:
             {
                 assert(first.m_object != nullptr);
-                throw std::domain_error("cannot use construct with iterators from " + first.m_object->type_name());
+                throw invalid_iterator("cannot use construct with iterators from " +
+                                       first.m_object->type_name(), 6);
             }
         }
     }
@@ -3776,9 +3854,10 @@ class basic_json
 
     @throw std::domain_error if called on a `null` value; example: `"cannot
     use erase() with null"`
-    @throw std::domain_error if called on an iterator which does not belong to
-    the current JSON value; example: `"iterator does not fit current value"`
-    @throw std::out_of_range if called on a primitive type with invalid
+    @throw invalid_iterator (3) if called on an iterator which does not belong
+    to the current JSON value; example: `"iterator does not fit current
+    value"`
+    @throw invalid_iterator (5) if called on a primitive type with invalid
     iterator (i.e., any iterator which is not `begin()`); example: `"iterator
     out of range"`
 
@@ -3811,7 +3890,7 @@ class basic_json
         // make sure iterator fits the current value
         if (this != pos.m_object)
         {
-            throw std::domain_error("iterator does not fit current value");
+            throw invalid_iterator("iterator does not fit current value", 3);
         }
 
         InteratorType result = end();
@@ -3826,7 +3905,7 @@ class basic_json
             {
                 if (not pos.m_it.primitive_iterator.is_begin())
                 {
-                    throw std::out_of_range("iterator out of range");
+                    throw invalid_iterator("iterator out of range", 5);
                 }
 
                 if (is_string())
@@ -3884,9 +3963,9 @@ class basic_json
 
     @throw std::domain_error if called on a `null` value; example: `"cannot
     use erase() with null"`
-    @throw std::domain_error if called on iterators which does not belong to
-    the current JSON value; example: `"iterators do not fit current value"`
-    @throw std::out_of_range if called on a primitive type with invalid
+    @throw invalid_iterator (2) if called on iterators which does not belong
+    to the current JSON value; example: `"iterators do not fit current value"`
+    @throw invalid_iterator (4) if called on a primitive type with invalid
     iterators (i.e., if `first != begin()` and `last != end()`); example:
     `"iterators out of range"`
 
@@ -3919,7 +3998,7 @@ class basic_json
         // make sure iterator fits the current value
         if (this != first.m_object or this != last.m_object)
         {
-            throw std::domain_error("iterators do not fit current value");
+            throw invalid_iterator("iterators do not fit current value", 2);
         }
 
         InteratorType result = end();
@@ -3934,7 +4013,7 @@ class basic_json
             {
                 if (not first.m_it.primitive_iterator.is_begin() or not last.m_it.primitive_iterator.is_end())
                 {
-                    throw std::out_of_range("iterators out of range");
+                    throw invalid_iterator("iterators out of range", 4);
                 }
 
                 if (is_string())
@@ -4937,8 +5016,8 @@ class basic_json
 
     @throw std::domain_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
-    @throw std::domain_error if @a pos is not an iterator of *this; example:
-    `"iterator does not fit current value"`
+    @throw invalid_iterator (3) if @a pos is not an iterator of *this;
+    example: `"iterator does not fit current value"`
 
     @complexity Constant plus linear in the distance between pos and end of the
     container.
@@ -4955,7 +5034,7 @@ class basic_json
             // check if iterator pos fits to this JSON value
             if (pos.m_object != this)
             {
-                throw std::domain_error("iterator does not fit current value");
+                throw invalid_iterator("iterator does not fit current value", 3);
             }
 
             // insert to array and return iterator
@@ -4993,8 +5072,8 @@ class basic_json
 
     @throw std::domain_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
-    @throw std::domain_error if @a pos is not an iterator of *this; example:
-    `"iterator does not fit current value"`
+    @throw invalid_iterator (3) if @a pos is not an iterator of *this;
+    example: `"iterator does not fit current value"`
 
     @complexity Linear in @a cnt plus linear in the distance between @a pos
     and end of the container.
@@ -5011,7 +5090,7 @@ class basic_json
             // check if iterator pos fits to this JSON value
             if (pos.m_object != this)
             {
-                throw std::domain_error("iterator does not fit current value");
+                throw invalid_iterator("iterator does not fit current value", 3);
             }
 
             // insert to array and return iterator
@@ -5038,11 +5117,11 @@ class basic_json
 
     @throw std::domain_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
-    @throw std::domain_error if @a pos is not an iterator of *this; example:
-    `"iterator does not fit current value"`
-    @throw std::domain_error if @a first and @a last do not belong to the same
-    JSON value; example: `"iterators do not fit"`
-    @throw std::domain_error if @a first or @a last are iterators into
+    @throw invalid_iterator (3) if @a pos is not an iterator of *this;
+    example: `"iterator does not fit current value"`
+    @throw invalid_iterator (10) if @a first and @a last do not belong to the
+    same JSON value; example: `"iterators do not fit"`
+    @throw invalid_iterator (11) if @a first or @a last are iterators into
     container for which insert is called; example: `"passed iterators may not
     belong to container"`
 
@@ -5067,18 +5146,19 @@ class basic_json
         // check if iterator pos fits to this JSON value
         if (pos.m_object != this)
         {
-            throw std::domain_error("iterator does not fit current value");
+            throw invalid_iterator("iterator does not fit current value", 3);
         }
 
         // check if range iterators belong to the same JSON object
         if (first.m_object != last.m_object)
         {
-            throw std::domain_error("iterators do not fit");
+            throw invalid_iterator("iterators do not fit", 10);
         }
 
+        // first and last iterator must not belong to this container
         if (first.m_object == this or last.m_object == this)
         {
-            throw std::domain_error("passed iterators may not belong to container");
+            throw invalid_iterator("passed iterators may not belong to container", 11);
         }
 
         // insert to array and return iterator
@@ -5102,8 +5182,8 @@ class basic_json
 
     @throw std::domain_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
-    @throw std::domain_error if @a pos is not an iterator of *this; example:
-    `"iterator does not fit current value"`
+    @throw invalid_iterator (3) if @a pos is not an iterator of *this;
+    example: `"iterator does not fit current value"`
 
     @return iterator pointing to the first element inserted, or @a pos if
     `ilist` is empty
@@ -5126,7 +5206,7 @@ class basic_json
         // check if iterator pos fits to this JSON value
         if (pos.m_object != this)
         {
-            throw std::domain_error("iterator does not fit current value");
+            throw invalid_iterator("iterator does not fit current value", 3);
         }
 
         // insert to array and return iterator
@@ -5174,8 +5254,8 @@ class basic_json
 
     @param[in,out] other array to exchange the contents with
 
-    @throw std::domain_error when JSON value is not an array; example: `"cannot
-    use swap() with string"`
+    @throw std::domain_error when JSON value is not an array; example:
+    `"cannot use swap() with string"`
 
     @complexity Constant.
 
@@ -6598,7 +6678,7 @@ class basic_json
 
                 case basic_json::value_t::null:
                 {
-                    throw std::out_of_range("cannot get value");
+                    throw invalid_iterator("cannot get value", 14);
                 }
 
                 default:
@@ -6609,7 +6689,7 @@ class basic_json
                     }
                     else
                     {
-                        throw std::out_of_range("cannot get value");
+                        throw invalid_iterator("cannot get value", 14);
                     }
                 }
             }
@@ -6644,7 +6724,7 @@ class basic_json
                     }
                     else
                     {
-                        throw std::out_of_range("cannot get value");
+                        throw invalid_iterator("cannot get value", 14);
                     }
                 }
             }
@@ -6730,7 +6810,7 @@ class basic_json
             // if objects are not the same, the comparison is undefined
             if (m_object != other.m_object)
             {
-                throw std::domain_error("cannot compare iterators of different containers");
+                throw invalid_iterator("cannot compare iterators of different containers", 12);
             }
 
             assert(m_object != nullptr);
@@ -6766,7 +6846,7 @@ class basic_json
             // if objects are not the same, the comparison is undefined
             if (m_object != other.m_object)
             {
-                throw std::domain_error("cannot compare iterators of different containers");
+                throw invalid_iterator("cannot compare iterators of different containers", 12);
             }
 
             assert(m_object != nullptr);
@@ -6775,7 +6855,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw std::domain_error("cannot compare order of object iterators");
+                    throw invalid_iterator("cannot compare order of object iterators", 13);
                 }
 
                 case basic_json::value_t::array:
@@ -6817,7 +6897,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw std::domain_error("cannot use offsets with object iterators");
+                    throw invalid_iterator("cannot use offsets with object iterators", 9);
                 }
 
                 case basic_json::value_t::array:
@@ -6867,7 +6947,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw std::domain_error("cannot use offsets with object iterators");
+                    throw invalid_iterator("cannot use offsets with object iterators", 9);
                 }
 
                 case basic_json::value_t::array:
@@ -6891,7 +6971,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw std::domain_error("cannot use operator[] for object iterators");
+                    throw invalid_iterator("cannot use operator[] for object iterators", 8);
                 }
 
                 case basic_json::value_t::array:
@@ -6901,7 +6981,7 @@ class basic_json
 
                 case basic_json::value_t::null:
                 {
-                    throw std::out_of_range("cannot get value");
+                    throw invalid_iterator("cannot get value", 14);
                 }
 
                 default:
@@ -6912,7 +6992,7 @@ class basic_json
                     }
                     else
                     {
-                        throw std::out_of_range("cannot get value");
+                        throw invalid_iterator("cannot get value", 14);
                     }
                 }
             }
@@ -6929,7 +7009,7 @@ class basic_json
             }
             else
             {
-                throw std::domain_error("cannot use key() for non-object iterators");
+                throw invalid_iterator("cannot use key() for non-object iterators", 7);
             }
         }
 
