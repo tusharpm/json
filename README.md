@@ -486,6 +486,7 @@ I deeply appreciate the help of the following people.
 - [Mário Feroldi](https://github.com/thelostt) fixed a small typo.
 - [duncanwerner](https://github.com/duncanwerner) found a really embarrassing performance regression in the 2.0.0 release.
 - [Damien](https://github.com/dtoma) fixed one of the last conversion warnings.
+- [Muri Nicanor](https://github.com/murinicanor) made the Makefile more portable by choosing the correct version of sed.
 
 Thanks a lot for helping out!
 

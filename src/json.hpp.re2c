@@ -8581,7 +8581,7 @@ class basic_json
 
                 // finally, store the reference token
                 unescape(reference_token);
-                result.push_back(reference_token);
+                result.emplace_back(reference_token);
             }
 
             return result;

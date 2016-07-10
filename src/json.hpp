@@ -7351,7 +7351,7 @@ class basic_json
         @throw std::out_of_range if code point is > 0x10ffff; example: `"code
         points above 0x10FFFF are invalid"`
         @throw std::invalid_argument if the low surrogate is invalid; example:
-        `""missing or wrong low surrogate""`
+        `"missing or wrong low surrogate"`
 
         @see <http://en.wikipedia.org/wiki/UTF-8#Sample_code>
         */
@@ -9271,7 +9271,7 @@ basic_json_parser_63:
 
                 // finally, store the reference token
                 unescape(reference_token);
-                result.push_back(reference_token);
+                result.emplace_back(reference_token);
             }
 
             return result;
