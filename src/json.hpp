@@ -306,10 +306,10 @@ class basic_json
         /*!
         @brief create a user-defined exception with description and error code
 
+        @param[in] error_code a code for the exception
         @param[in] what_arg a description for the exception
-        @param[in] error_code a code for the exception (optional)
         */
-        exception(const std::string& what_arg, int error_code = -1)
+        exception(int error_code, const std::string& what_arg)
             : std::exception(),
               message("[except." + std::to_string(error_code) + "] " + what_arg),
               ecode(error_code)
@@ -336,6 +336,12 @@ class basic_json
 
     /// class for iterator-related exceptions
     class invalid_iterator : public exception
+    {
+        using exception::exception;
+    };
+
+    /// class for parser-related exceptions
+    class parse_error : public exception
     {
         using exception::exception;
     };
@@ -1854,7 +1860,7 @@ class basic_json
         // make sure iterator fits the current value
         if (first.m_object != last.m_object)
         {
-            throw invalid_iterator("iterators are not compatible", 1);
+            throw invalid_iterator(1, "iterators are not compatible");
         }
 
         // check if iterator range is complete for primitive values
@@ -1868,7 +1874,7 @@ class basic_json
             {
                 if (not first.m_it.primitive_iterator.is_begin() or not last.m_it.primitive_iterator.is_end())
                 {
-                    throw invalid_iterator("iterators out of range", 4);
+                    throw invalid_iterator(4, "iterators out of range");
                 }
                 break;
             }
@@ -1931,8 +1937,8 @@ class basic_json
             default:
             {
                 assert(first.m_object != nullptr);
-                throw invalid_iterator("cannot use construct with iterators from " +
-                                       first.m_object->type_name(), 6);
+                throw invalid_iterator(6, "cannot use construct with iterators from " +
+                                       first.m_object->type_name());
             }
         }
     }
@@ -3891,7 +3897,7 @@ class basic_json
         // make sure iterator fits the current value
         if (this != pos.m_object)
         {
-            throw invalid_iterator("iterator does not fit current value", 3);
+            throw invalid_iterator(3, "iterator does not fit current value");
         }
 
         InteratorType result = end();
@@ -3906,7 +3912,7 @@ class basic_json
             {
                 if (not pos.m_it.primitive_iterator.is_begin())
                 {
-                    throw invalid_iterator("iterator out of range", 5);
+                    throw invalid_iterator(5, "iterator out of range");
                 }
 
                 if (is_string())
@@ -3999,7 +4005,7 @@ class basic_json
         // make sure iterator fits the current value
         if (this != first.m_object or this != last.m_object)
         {
-            throw invalid_iterator("iterators do not fit current value", 2);
+            throw invalid_iterator(2, "iterators do not fit current value");
         }
 
         InteratorType result = end();
@@ -4014,7 +4020,7 @@ class basic_json
             {
                 if (not first.m_it.primitive_iterator.is_begin() or not last.m_it.primitive_iterator.is_end())
                 {
-                    throw invalid_iterator("iterators out of range", 4);
+                    throw invalid_iterator(4, "iterators out of range");
                 }
 
                 if (is_string())
@@ -5035,7 +5041,7 @@ class basic_json
             // check if iterator pos fits to this JSON value
             if (pos.m_object != this)
             {
-                throw invalid_iterator("iterator does not fit current value", 3);
+                throw invalid_iterator(3, "iterator does not fit current value");
             }
 
             // insert to array and return iterator
@@ -5091,7 +5097,7 @@ class basic_json
             // check if iterator pos fits to this JSON value
             if (pos.m_object != this)
             {
-                throw invalid_iterator("iterator does not fit current value", 3);
+                throw invalid_iterator(3, "iterator does not fit current value");
             }
 
             // insert to array and return iterator
@@ -5147,19 +5153,19 @@ class basic_json
         // check if iterator pos fits to this JSON value
         if (pos.m_object != this)
         {
-            throw invalid_iterator("iterator does not fit current value", 3);
+            throw invalid_iterator(3, "iterator does not fit current value");
         }
 
         // check if range iterators belong to the same JSON object
         if (first.m_object != last.m_object)
         {
-            throw invalid_iterator("iterators do not fit", 10);
+            throw invalid_iterator(10, "iterators do not fit");
         }
 
         // first and last iterator must not belong to this container
         if (first.m_object == this or last.m_object == this)
         {
-            throw invalid_iterator("passed iterators may not belong to container", 11);
+            throw invalid_iterator(11, "passed iterators may not belong to container");
         }
 
         // insert to array and return iterator
@@ -5207,7 +5213,7 @@ class basic_json
         // check if iterator pos fits to this JSON value
         if (pos.m_object != this)
         {
-            throw invalid_iterator("iterator does not fit current value", 3);
+            throw invalid_iterator(3, "iterator does not fit current value");
         }
 
         // insert to array and return iterator
@@ -6679,7 +6685,7 @@ class basic_json
 
                 case basic_json::value_t::null:
                 {
-                    throw invalid_iterator("cannot get value", 14);
+                    throw invalid_iterator(14, "cannot get value");
                 }
 
                 default:
@@ -6690,7 +6696,7 @@ class basic_json
                     }
                     else
                     {
-                        throw invalid_iterator("cannot get value", 14);
+                        throw invalid_iterator(14, "cannot get value");
                     }
                 }
             }
@@ -6725,7 +6731,7 @@ class basic_json
                     }
                     else
                     {
-                        throw invalid_iterator("cannot get value", 14);
+                        throw invalid_iterator(14, "cannot get value");
                     }
                 }
             }
@@ -6811,7 +6817,7 @@ class basic_json
             // if objects are not the same, the comparison is undefined
             if (m_object != other.m_object)
             {
-                throw invalid_iterator("cannot compare iterators of different containers", 12);
+                throw invalid_iterator(12, "cannot compare iterators of different containers");
             }
 
             assert(m_object != nullptr);
@@ -6847,7 +6853,7 @@ class basic_json
             // if objects are not the same, the comparison is undefined
             if (m_object != other.m_object)
             {
-                throw invalid_iterator("cannot compare iterators of different containers", 12);
+                throw invalid_iterator(12, "cannot compare iterators of different containers");
             }
 
             assert(m_object != nullptr);
@@ -6856,7 +6862,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw invalid_iterator("cannot compare order of object iterators", 13);
+                    throw invalid_iterator(13, "cannot compare order of object iterators");
                 }
 
                 case basic_json::value_t::array:
@@ -6898,7 +6904,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw invalid_iterator("cannot use offsets with object iterators", 9);
+                    throw invalid_iterator(9, "cannot use offsets with object iterators");
                 }
 
                 case basic_json::value_t::array:
@@ -6948,7 +6954,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw invalid_iterator("cannot use offsets with object iterators", 9);
+                    throw invalid_iterator(9, "cannot use offsets with object iterators");
                 }
 
                 case basic_json::value_t::array:
@@ -6972,7 +6978,7 @@ class basic_json
             {
                 case basic_json::value_t::object:
                 {
-                    throw invalid_iterator("cannot use operator[] for object iterators", 8);
+                    throw invalid_iterator(8, "cannot use operator[] for object iterators");
                 }
 
                 case basic_json::value_t::array:
@@ -6982,7 +6988,7 @@ class basic_json
 
                 case basic_json::value_t::null:
                 {
-                    throw invalid_iterator("cannot get value", 14);
+                    throw invalid_iterator(14, "cannot get value");
                 }
 
                 default:
@@ -6993,7 +6999,7 @@ class basic_json
                     }
                     else
                     {
-                        throw invalid_iterator("cannot get value", 14);
+                        throw invalid_iterator(14, "cannot get value");
                     }
                 }
             }
@@ -7010,7 +7016,7 @@ class basic_json
             }
             else
             {
-                throw invalid_iterator("cannot use key() for non-object iterators", 7);
+                throw invalid_iterator(7, "cannot use key() for non-object iterators");
             }
         }
 
@@ -8611,7 +8617,7 @@ basic_json_parser_63:
         {
             basic_json result = parse_internal(true);
 
-            expect(lexer::token_type::end_of_input);
+            expect(lexer::token_type::end_of_input, 15);
 
             // return parser result and replace it with null in case the
             // top-level value was discarded by the callback function
@@ -8650,7 +8656,7 @@ basic_json_parser_63:
                     }
 
                     // no comma is expected here
-                    unexpect(lexer::token_type::value_separator);
+                    unexpect(lexer::token_type::value_separator, 16);
 
                     // otherwise: parse key-value pairs
                     do
@@ -8662,7 +8668,7 @@ basic_json_parser_63:
                         }
 
                         // store key
-                        expect(lexer::token_type::value_string);
+                        expect(lexer::token_type::value_string, 17);
                         const auto key = m_lexer.get_string();
 
                         bool keep_tag = false;
@@ -8681,7 +8687,7 @@ basic_json_parser_63:
 
                         // parse separator (:)
                         get_token();
-                        expect(lexer::token_type::name_separator);
+                        expect(lexer::token_type::name_separator, 18);
 
                         // parse and add value
                         get_token();
@@ -8694,7 +8700,7 @@ basic_json_parser_63:
                     while (last_token == lexer::token_type::value_separator);
 
                     // closing }
-                    expect(lexer::token_type::end_object);
+                    expect(lexer::token_type::end_object, 19);
                     get_token();
                     if (keep and callback and not callback(--depth, parse_event_t::object_end, result))
                     {
@@ -8728,7 +8734,7 @@ basic_json_parser_63:
                     }
 
                     // no comma is expected here
-                    unexpect(lexer::token_type::value_separator);
+                    unexpect(lexer::token_type::value_separator, 20);
 
                     // otherwise: parse values
                     do
@@ -8749,7 +8755,7 @@ basic_json_parser_63:
                     while (last_token == lexer::token_type::value_separator);
 
                     // closing ]
-                    expect(lexer::token_type::end_array);
+                    expect(lexer::token_type::end_array, 21);
                     get_token();
                     if (keep and callback and not callback(--depth, parse_event_t::array_end, result))
                     {
@@ -8800,7 +8806,7 @@ basic_json_parser_63:
                 default:
                 {
                     // the last token was unexpected
-                    unexpect(last_token);
+                    unexpect(last_token, 22);
                 }
             }
 
@@ -8818,7 +8824,7 @@ basic_json_parser_63:
             return last_token;
         }
 
-        void expect(typename lexer::token_type t) const
+        void expect(typename lexer::token_type t, int = -1) const
         {
             if (t != last_token)
             {
@@ -8831,7 +8837,7 @@ basic_json_parser_63:
             }
         }
 
-        void unexpect(typename lexer::token_type t) const
+        void unexpect(typename lexer::token_type t, int = -1) const
         {
             if (t == last_token)
             {
