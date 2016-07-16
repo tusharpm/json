@@ -5840,6 +5840,8 @@ class basic_json
 
     @return result of the deserialization
 
+    @throw parse_error (15-22) in case of parse errors
+
     @complexity Linear in the length of the input. The parser is a predictive
     LL(1) parser. The complexity can be higher if the parser callback function
     @a cb has a super-linear complexity.
@@ -5866,6 +5868,8 @@ class basic_json
     @param[in] cb a parser callback function of type @ref parser_callback_t
     which is used to control the deserialization by filtering unwanted values
     (optional)
+
+    @throw parse_error (15-22) in case of parse errors
 
     @return result of the deserialization
 
@@ -5904,7 +5908,7 @@ class basic_json
     @param[in,out] i  input stream to read a serialized JSON value from
     @param[in,out] j  JSON value to write the deserialized input to
 
-    @throw std::invalid_argument in case of parse errors
+    @throw parse_error (15-22) in case of parse errors
 
     @complexity Linear in the length of the input. The parser is a predictive
     LL(1) parser.
@@ -7355,9 +7359,9 @@ class basic_json
 
         @return string representation of the code point
 
-        @throw std::out_of_range if code point is > 0x10ffff; example: `"code
+        @throw parse_error (24) if code point is > 0x10ffff; example: `"code
         points above 0x10FFFF are invalid"`
-        @throw std::invalid_argument if the low surrogate is invalid; example:
+        @throw parse_error (23) if the low surrogate is invalid; example:
         `"missing or wrong low surrogate"`
 
         @see <http://en.wikipedia.org/wiki/UTF-8#Sample_code>
@@ -7386,7 +7390,7 @@ class basic_json
                 }
                 else
                 {
-                    throw std::invalid_argument("missing or wrong low surrogate");
+                    throw parse_error(23, "missing or wrong low surrogate");
                 }
             }
 
@@ -7420,7 +7424,7 @@ class basic_json
             }
             else
             {
-                throw std::out_of_range("code points above 0x10FFFF are invalid");
+                throw parse_error(24, "code points above 0x10FFFF are invalid");
             }
 
             return result;
@@ -8295,7 +8299,9 @@ basic_json_parser_63:
 
         @return string value of current token without opening and closing
         quotes
-        @throw std::out_of_range if to_unicode fails
+
+        @throw parse_error (23,24) if to_unicode fails
+        @throw parse_error (25) if low surrogate is missing
         */
         string_t get_string() const
         {
@@ -8368,7 +8374,7 @@ basic_json_parser_63:
                                 // make sure there is a subsequent unicode
                                 if ((i + 6 >= m_limit) or * (i + 5) != '\\' or * (i + 6) != 'u')
                                 {
-                                    throw std::invalid_argument("missing low surrogate");
+                                    throw parse_error(25, "missing low surrogate");
                                 }
 
                                 // get code yyyy from uxxxx\uyyyy
@@ -8824,7 +8830,7 @@ basic_json_parser_63:
             return last_token;
         }
 
-        void expect(typename lexer::token_type t, int = -1) const
+        void expect(typename lexer::token_type t, int error_code) const
         {
             if (t != last_token)
             {
@@ -8833,11 +8839,11 @@ basic_json_parser_63:
                               "'") :
                               lexer::token_type_name(last_token));
                 error_msg += "; expected " + lexer::token_type_name(t);
-                throw std::invalid_argument(error_msg);
+                throw parse_error(error_code, error_msg);
             }
         }
 
-        void unexpect(typename lexer::token_type t, int = -1) const
+        void unexpect(typename lexer::token_type t, int error_code) const
         {
             if (t == last_token)
             {
@@ -8845,7 +8851,7 @@ basic_json_parser_63:
                 error_msg += (last_token == lexer::token_type::parse_error ? ("'" +  m_lexer.get_token_string() +
                               "'") :
                               lexer::token_type_name(last_token));
-                throw std::invalid_argument(error_msg);
+                throw parse_error(error_code, error_msg);
             }
         }
 
