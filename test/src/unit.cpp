@@ -1,7 +1,7 @@
 /*
     __ _____ _____ _____
  __|  |   __|     |   | |  JSON for Modern C++ (test suite)
-|  |  |__   |  |  | | | |  version 2.0.1
+|  |  |__   |  |  | | | |  version 3.0.0
 |_____|_____|_____|_|___|  https://github.com/nlohmann/json
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
@@ -13467,8 +13467,8 @@ TEST_CASE("JSON patch")
             {
                 json j = {1, 2};
                 json patch = {{{"op", "add"}, {"path", "/4"}, {"value", 4}}};
-                CHECK_THROWS_AS(j.patch(patch), std::out_of_range);
-                CHECK_THROWS_WITH(j.patch(patch), "array index 4 is out of range");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.406] array index 4 is out of range");
             }
         }
 

@@ -1,7 +1,7 @@
 /*
     __ _____ _____ _____
  __|  |   __|     |   | |  JSON for Modern C++
-|  |  |__   |  |  | | | |  version 2.0.1
+|  |  |__   |  |  | | | |  version 3.0.0
 |_____|_____|_____|_|___|  https://github.com/nlohmann/json
 
 Licensed under the MIT License <http://opensource.org/licenses/MIT>.
@@ -9801,7 +9801,7 @@ basic_json_parser_63:
                             if (static_cast<size_type>(idx) > parent.size())
                             {
                                 // avoid undefined behavior
-                                throw std::out_of_range("array index " + std::to_string(idx) + " is out of range");
+                                throw extension_error(406, "array index " + std::to_string(idx) + " is out of range");
                             }
                             else
                             {
