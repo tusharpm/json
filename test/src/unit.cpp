@@ -12401,20 +12401,23 @@ TEST_CASE("JSON pointers")
 {
     SECTION("errors")
     {
-        CHECK_THROWS_AS(json::json_pointer("foo"), std::domain_error);
-        CHECK_THROWS_WITH(json::json_pointer("foo"), "JSON pointer must be empty or begin with '/'");
+        CHECK_THROWS_AS(json::json_pointer("foo"), json::extension_error);
+        CHECK_THROWS_WITH(json::json_pointer("foo"),
+                          "[except.403] JSON pointer must be empty or begin with '/'");
 
-        CHECK_THROWS_AS(json::json_pointer("/~~"), std::domain_error);
-        CHECK_THROWS_WITH(json::json_pointer("/~~"), "escape error: '~' must be followed with '0' or '1'");
+        CHECK_THROWS_AS(json::json_pointer("/~~"), json::extension_error);
+        CHECK_THROWS_WITH(json::json_pointer("/~~"),
+                          "[except.404] escape error: '~' must be followed with '0' or '1'");
 
-        CHECK_THROWS_AS(json::json_pointer("/~"), std::domain_error);
-        CHECK_THROWS_WITH(json::json_pointer("/~"), "escape error: '~' must be followed with '0' or '1'");
+        CHECK_THROWS_AS(json::json_pointer("/~"), json::extension_error);
+        CHECK_THROWS_WITH(json::json_pointer("/~"),
+                          "[except.404] escape error: '~' must be followed with '0' or '1'");
 
         json::json_pointer p;
-        CHECK_THROWS_AS(p.top(), std::domain_error);
-        CHECK_THROWS_WITH(p.top(), "JSON pointer has no parent");
-        CHECK_THROWS_AS(p.pop_back(), std::domain_error);
-        CHECK_THROWS_WITH(p.pop_back(), "JSON pointer has no parent");
+        CHECK_THROWS_AS(p.top(), json::extension_error);
+        CHECK_THROWS_WITH(p.top(), "[except.401] JSON pointer has no parent");
+        CHECK_THROWS_AS(p.pop_back(), json::extension_error);
+        CHECK_THROWS_WITH(p.pop_back(), "[except.401] JSON pointer has no parent");
     }
 
     SECTION("examples from RFC 6901")
@@ -12474,17 +12477,20 @@ TEST_CASE("JSON pointers")
             CHECK(j[json::json_pointer("/m~0n")] == j["m~n"]);
 
             // unescaped access
-            CHECK_THROWS_AS(j[json::json_pointer("/a/b")], std::out_of_range);
-            CHECK_THROWS_WITH(j[json::json_pointer("/a/b")], "unresolved reference token 'b'");
+            CHECK_THROWS_AS(j[json::json_pointer("/a/b")], json::extension_error);
+            CHECK_THROWS_WITH(j[json::json_pointer("/a/b")],
+                              "[except.405] unresolved reference token 'b'");
             // "/a/b" works for JSON {"a": {"b": 42}}
             CHECK(json({{"a", {{"b", 42}}}})[json::json_pointer("/a/b")] == json(42));
 
             // unresolved access
             json j_primitive = 1;
-            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer], "unresolved reference token 'foo'");
-            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer), "unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], json::extension_error);
+            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer],
+                              "[except.405] unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), json::extension_error);
+            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer),
+                              "[except.405] unresolved reference token 'foo'");
         }
 
         SECTION("const access")
@@ -12547,10 +12553,12 @@ TEST_CASE("JSON pointers")
 
             // unresolved access
             const json j_primitive = 1;
-            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer], "unresolved reference token 'foo'");
-            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer), "unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], json::extension_error);
+            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer],
+                              "[except.405] unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), json::extension_error);
+            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer),
+                              "[except.405] unresolved reference token 'foo'");
         }
 
         SECTION("user-defined string literal")
@@ -12605,31 +12613,35 @@ TEST_CASE("JSON pointers")
             CHECK(j == json({1, 13, 3, 33, nullptr, 55}));
 
             // error with leading 0
-            CHECK_THROWS_AS(j["/01"_json_pointer], std::domain_error);
-            CHECK_THROWS_WITH(j["/01"_json_pointer], "array index must not begin with '0'");
-            CHECK_THROWS_AS(j_const["/01"_json_pointer], std::domain_error);
-            CHECK_THROWS_WITH(j_const["/01"_json_pointer], "array index must not begin with '0'");
-            CHECK_THROWS_AS(j.at("/01"_json_pointer), std::domain_error);
-            CHECK_THROWS_WITH(j.at("/01"_json_pointer), "array index must not begin with '0'");
-            CHECK_THROWS_AS(j_const.at("/01"_json_pointer), std::domain_error);
-            CHECK_THROWS_WITH(j_const.at("/01"_json_pointer), "array index must not begin with '0'");
+            CHECK_THROWS_AS(j["/01"_json_pointer], json::extension_error);
+            CHECK_THROWS_WITH(j["/01"_json_pointer], "[except.402] array index must not begin with '0'");
+            CHECK_THROWS_AS(j_const["/01"_json_pointer], json::extension_error);
+            CHECK_THROWS_WITH(j_const["/01"_json_pointer], "[except.402] array index must not begin with '0'");
+            CHECK_THROWS_AS(j.at("/01"_json_pointer), json::extension_error);
+            CHECK_THROWS_WITH(j.at("/01"_json_pointer), "[except.402] array index must not begin with '0'");
+            CHECK_THROWS_AS(j_const.at("/01"_json_pointer), json::extension_error);
+            CHECK_THROWS_WITH(j_const.at("/01"_json_pointer),
+                              "[except.402] array index must not begin with '0'");
 
             // error with incorrect numbers
-            CHECK_THROWS_AS(j["/one"_json_pointer] = 1, std::invalid_argument);
+            CHECK_THROWS_AS(j["/one"_json_pointer] = 1, json::extension_error);
+            CHECK_THROWS_WITH(j["/one"_json_pointer],
+                              "[except.402] array index is 'one', but must be a number");
 
             // assign to "-"
             j["/-"_json_pointer] = 99;
             CHECK(j == json({1, 13, 3, 33, nullptr, 55, 99}));
 
             // error when using "-" in const object
-            CHECK_THROWS_AS(j_const["/-"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j_const["/-"_json_pointer], "array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j_const["/-"_json_pointer], json::extension_error);
+            CHECK_THROWS_WITH(j_const["/-"_json_pointer], "[except.406] array index '-' (3) is out of range");
 
             // error when using "-" with at
-            CHECK_THROWS_AS(j.at("/-"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j.at("/-"_json_pointer), "array index '-' (7) is out of range");
-            CHECK_THROWS_AS(j_const.at("/-"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j_const.at("/-"_json_pointer), "array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j.at("/-"_json_pointer), json::extension_error);
+            CHECK_THROWS_WITH(j.at("/-"_json_pointer), "[except.406] array index '-' (7) is out of range");
+            CHECK_THROWS_AS(j_const.at("/-"_json_pointer), json::extension_error);
+            CHECK_THROWS_WITH(j_const.at("/-"_json_pointer),
+                              "[except.406] array index '-' (3) is out of range");
         }
 
         SECTION("const access")
@@ -12650,10 +12662,10 @@ TEST_CASE("JSON pointers")
             CHECK_THROWS_WITH(j.at("/5"_json_pointer), "array index 5 is out of range");
 
             // assign to "-"
-            CHECK_THROWS_AS(j["/-"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j["/-"_json_pointer], "array index '-' (3) is out of range");
-            CHECK_THROWS_AS(j.at("/-"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j.at("/-"_json_pointer), "array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j["/-"_json_pointer], json::extension_error);
+            CHECK_THROWS_WITH(j["/-"_json_pointer], "[except.406] array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j.at("/-"_json_pointer), json::extension_error);
+            CHECK_THROWS_WITH(j.at("/-"_json_pointer), "[except.406] array index '-' (3) is out of range");
         }
 
     }
@@ -12709,17 +12721,18 @@ TEST_CASE("JSON pointers")
         CHECK(j_flatten.unflatten() == j);
 
         // error for nonobjects
-        CHECK_THROWS_AS(json(1).unflatten(), std::domain_error);
-        CHECK_THROWS_WITH(json(1).unflatten(), "only objects can be unflattened");
+        CHECK_THROWS_AS(json(1).unflatten(), json::extension_error);
+        CHECK_THROWS_WITH(json(1).unflatten(), "[except.412] only objects can be unflattened");
 
         // error for nonprimitve values
-        CHECK_THROWS_AS(json({{"/1", {1, 2, 3}}}).unflatten(), std::domain_error);
-        CHECK_THROWS_WITH(json({{"/1", {1, 2, 3}}}).unflatten(), "values in object must be primitive");
+        CHECK_THROWS_AS(json({{"/1", {1, 2, 3}}}).unflatten(), json::extension_error);
+        CHECK_THROWS_WITH(json({{"/1", {1, 2, 3}}}).unflatten(),
+        "[except.413] values in object must be primitive");
 
         // error for conflicting values
         json j_error = {{"", 42}, {"/foo", 17}};
-        CHECK_THROWS_AS(j_error.unflatten(), std::domain_error);
-        CHECK_THROWS_WITH(j_error.unflatten(), "invalid value to unflatten");
+        CHECK_THROWS_AS(j_error.unflatten(), json::extension_error);
+        CHECK_THROWS_WITH(j_error.unflatten(), "[except.411] invalid value to unflatten");
 
         // explicit roundtrip check
         CHECK(j.flatten().unflatten() == j);
@@ -13057,8 +13070,8 @@ TEST_CASE("JSON patch")
                 )"_json;
 
             // check that evaluation throws
-            CHECK_THROWS_AS(doc.patch(patch), std::domain_error);
-            CHECK_THROWS_WITH(doc.patch(patch), "unsuccessful: " + patch[0].dump());
+            CHECK_THROWS_AS(doc.patch(patch), json::extension_error);
+            CHECK_THROWS_WITH(doc.patch(patch), "[except.410] unsuccessful: " + patch[0].dump());
         }
 
         SECTION("A.10. Adding a Nested Member Object")
@@ -13197,8 +13210,8 @@ TEST_CASE("JSON patch")
                 )"_json;
 
             // check that evaluation throws
-            CHECK_THROWS_AS(doc.patch(patch), std::domain_error);
-            CHECK_THROWS_WITH(doc.patch(patch), "unsuccessful: " + patch[0].dump());
+            CHECK_THROWS_AS(doc.patch(patch), json::extension_error);
+            CHECK_THROWS_WITH(doc.patch(patch), "[except.410] unsuccessful: " + patch[0].dump());
         }
 
         SECTION("A.16. Adding an Array Value")
@@ -13387,40 +13400,40 @@ TEST_CASE("JSON patch")
             {
                 json j;
                 json patch = {{"op", "add"}, {"path", ""}, {"value", 1}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "JSON patch must be an array of objects");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.407] JSON patch must be an array of objects");
             }
 
             SECTION("not an array of objects")
             {
                 json j;
                 json patch = {"op", "add", "path", "", "value", 1};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "JSON patch must be an array of objects");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.407] JSON patch must be an array of objects");
             }
 
             SECTION("missing 'op'")
             {
                 json j;
                 json patch = {{{"foo", "bar"}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation must have member 'op'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation must have string member 'op'");
             }
 
             SECTION("non-string 'op'")
             {
                 json j;
                 json patch = {{{"op", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation must have string member 'op'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation must have string member 'op'");
             }
 
             SECTION("invalid operation")
             {
                 json j;
                 json patch = {{{"op", "foo"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation value 'foo' is invalid");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.409] operation value 'foo' is invalid");
             }
         }
 
@@ -13430,24 +13443,24 @@ TEST_CASE("JSON patch")
             {
                 json j;
                 json patch = {{{"op", "add"}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'add' must have member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'add' must have string member 'path'");
             }
 
             SECTION("non-string 'path'")
             {
                 json j;
                 json patch = {{{"op", "add"}, {"path", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'add' must have string member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'add' must have string member 'path'");
             }
 
             SECTION("missing 'value'")
             {
                 json j;
                 json patch = {{{"op", "add"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'add' must have member 'value'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'add' must have string member 'value'");
             }
 
             SECTION("invalid array index")
@@ -13465,16 +13478,16 @@ TEST_CASE("JSON patch")
             {
                 json j;
                 json patch = {{{"op", "remove"}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'remove' must have member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'remove' must have string member 'path'");
             }
 
             SECTION("non-string 'path'")
             {
                 json j;
                 json patch = {{{"op", "remove"}, {"path", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'remove' must have string member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'remove' must have string member 'path'");
             }
 
             SECTION("nonexisting target location (array)")
@@ -13497,8 +13510,8 @@ TEST_CASE("JSON patch")
             {
                 json j = "string";
                 json patch = {{{"op", "remove"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::domain_error);
-                CHECK_THROWS_WITH(j.patch(patch), "JSON pointer has no parent");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.401] JSON pointer has no parent");
             }
         }
 
@@ -13508,24 +13521,27 @@ TEST_CASE("JSON patch")
             {
                 json j;
                 json patch = {{{"op", "replace"}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'replace' must have member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch),
+                                  "[except.408] operation 'replace' must have string member 'path'");
             }
 
             SECTION("non-string 'path'")
             {
                 json j;
                 json patch = {{{"op", "replace"}, {"path", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'replace' must have string member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch),
+                                  "[except.408] operation 'replace' must have string member 'path'");
             }
 
             SECTION("missing 'value'")
             {
                 json j;
                 json patch = {{{"op", "replace"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'replace' must have member 'value'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch),
+                                  "[except.408] operation 'replace' must have string member 'value'");
             }
 
             SECTION("nonexisting target location (array)")
@@ -13551,32 +13567,32 @@ TEST_CASE("JSON patch")
             {
                 json j;
                 json patch = {{{"op", "move"}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'move' must have member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'move' must have string member 'path'");
             }
 
             SECTION("non-string 'path'")
             {
                 json j;
                 json patch = {{{"op", "move"}, {"path", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'move' must have string member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'move' must have string member 'path'");
             }
 
             SECTION("missing 'from'")
             {
                 json j;
                 json patch = {{{"op", "move"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'move' must have member 'from'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'move' must have string member 'from'");
             }
 
             SECTION("non-string 'from'")
             {
                 json j;
                 json patch = {{{"op", "move"}, {"path", ""}, {"from", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'move' must have string member 'from'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'move' must have string member 'from'");
             }
 
             SECTION("nonexisting from location (array)")
@@ -13602,32 +13618,32 @@ TEST_CASE("JSON patch")
             {
                 json j;
                 json patch = {{{"op", "copy"}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'copy' must have member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'copy' must have string member 'path'");
             }
 
             SECTION("non-string 'path'")
             {
                 json j;
                 json patch = {{{"op", "copy"}, {"path", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'copy' must have string member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'copy' must have string member 'path'");
             }
 
             SECTION("missing 'from'")
             {
                 json j;
                 json patch = {{{"op", "copy"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'copy' must have member 'from'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'copy' must have string member 'from'");
             }
 
             SECTION("non-string 'from'")
             {
                 json j;
                 json patch = {{{"op", "copy"}, {"path", ""}, {"from", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'copy' must have string member 'from'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'copy' must have string member 'from'");
             }
 
             SECTION("nonexisting from location (array)")
@@ -13653,24 +13669,24 @@ TEST_CASE("JSON patch")
             {
                 json j;
                 json patch = {{{"op", "test"}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'test' must have member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'test' must have string member 'path'");
             }
 
             SECTION("non-string 'path'")
             {
                 json j;
                 json patch = {{{"op", "test"}, {"path", 1}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'test' must have string member 'path'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'test' must have string member 'path'");
             }
 
             SECTION("missing 'value'")
             {
                 json j;
                 json patch = {{{"op", "test"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::invalid_argument);
-                CHECK_THROWS_WITH(j.patch(patch), "operation 'test' must have member 'value'");
+                CHECK_THROWS_AS(j.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(j.patch(patch), "[except.408] operation 'test' must have string member 'value'");
             }
         }
     }
@@ -13862,8 +13878,8 @@ TEST_CASE("JSON patch")
                 )"_json;
 
                 // the test will fail
-                CHECK_THROWS_AS(doc.patch(patch), std::domain_error);
-                CHECK_THROWS_WITH(doc.patch(patch), "unsuccessful: " + patch[0].dump());
+                CHECK_THROWS_AS(doc.patch(patch), json::extension_error);
+                CHECK_THROWS_WITH(doc.patch(patch), "[except.410] unsuccessful: " + patch[0].dump());
             }
         }
     }

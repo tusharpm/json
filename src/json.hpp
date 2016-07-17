@@ -352,6 +352,12 @@ class basic_json
         using exception::exception;
     };
 
+    /// class for extension-related exceptions (error code 4xx)
+    class extension_error : public exception
+    {
+        using exception::exception;
+    };
+
     /// @}
 
 
@@ -1774,7 +1780,7 @@ class basic_json
 
     @return JSON object value
 
-    @throw std::domain_error if @a init is not a pair whose first elements are
+    @throw type_error (301) if @a init is not a pair whose first elements are
     strings; thrown by
     @ref basic_json(std::initializer_list<basic_json>, bool, value_t)
 
@@ -2921,7 +2927,7 @@ class basic_json
 
     @return copy of the JSON value, converted to type @a ValueType
 
-    @throw std::domain_error in case passed type @a ValueType is incompatible
+    @throw type_error (302) in case passed type @a ValueType is incompatible
     to JSON; example: `"type must be object, but is null"`
 
     @complexity Linear in the size of the JSON value.
@@ -3101,7 +3107,7 @@ class basic_json
     reference type @a ReferenceType fits to the JSON value; throws
     std::domain_error otherwise
 
-    @throw std::domain_error in case passed type @a ReferenceType is
+    @throw type_error (310) in case passed type @a ReferenceType is
     incompatible with the stored JSON value
 
     @complexity Constant.
@@ -3149,7 +3155,7 @@ class basic_json
 
     @return copy of the JSON value, converted to type @a ValueType
 
-    @throw std::domain_error in case passed type @a ValueType is incompatible
+    @throw type_error (310) in case passed type @a ValueType is incompatible
     to JSON, thrown by @ref get() const
 
     @complexity Linear in the size of the JSON value.
@@ -3562,7 +3568,7 @@ class basic_json
 
     @return reference to the element at key @a key
 
-    @throw std::domain_error if JSON is not an object or null; example:
+    @throw type_error (304) if JSON is not an object or null; example:
     `"cannot use operator[] with string"`
 
     @complexity Logarithmic in the size of the container.
@@ -8929,10 +8935,10 @@ basic_json_parser_63:
                       empty string is assumed which references the whole JSON
                       value
 
-        @throw std::domain_error if reference token is nonempty and does not
-        begin with a slash (`/`); example: `"JSON pointer must be empty or
+        @throw extension_error (403) if reference token is nonempty and does
+        not begin with a slash (`/`); example: `"JSON pointer must be empty or
         begin with /"`
-        @throw std::domain_error if a tilde (`~`) is not followed by `0`
+        @throw extension_error (404) if a tilde (`~`) is not followed by `0`
         (representing `~`) or `1` (representing `/`); example: `"escape error:
         ~ must be followed with 0 or 1"`
 
@@ -8982,7 +8988,7 @@ basic_json_parser_63:
         {
             if (is_root())
             {
-                throw std::domain_error("JSON pointer has no parent");
+                throw extension_error(401, "JSON pointer has no parent");
             }
 
             auto last = reference_tokens.back();
@@ -9000,7 +9006,7 @@ basic_json_parser_63:
         {
             if (is_root())
             {
-                throw std::domain_error("JSON pointer has no parent");
+                throw extension_error(401, "JSON pointer has no parent");
             }
 
             json_pointer result = *this;
@@ -9059,7 +9065,7 @@ basic_json_parser_63:
                     */
                     default:
                     {
-                        throw std::domain_error("invalid value to unflatten");
+                        throw extension_error(411, "invalid value to unflatten");
                     }
                 }
             }
@@ -9077,8 +9083,10 @@ basic_json_parser_63:
         @complexity Linear in the length of the JSON pointer.
 
         @throw std::out_of_range      if the JSON pointer can not be resolved
-        @throw std::domain_error      if an array index begins with '0'
-        @throw std::invalid_argument  if an array index was not a number
+        @throw extension_error (402)  if an array index begins with '0' or is
+        not a number
+        @throw extension_error (405)  if the reference token could not be
+        resolved
         */
         reference get_unchecked(pointer ptr) const
         {
@@ -9098,7 +9106,7 @@ basic_json_parser_63:
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            throw std::domain_error("array index must not begin with '0'");
+                            throw extension_error(402, "array index must not begin with '0'");
                         }
 
                         if (reference_token == "-")
@@ -9109,14 +9117,24 @@ basic_json_parser_63:
                         else
                         {
                             // convert array index to number; unchecked access
-                            ptr = &ptr->operator[](static_cast<size_type>(std::stoi(reference_token)));
+                            try
+                            {
+                                ptr = &ptr->operator[](static_cast<size_type>(std::stoi(reference_token)));
+                            }
+                            catch (std::invalid_argument&)
+                            {
+                                // std::stoi throws std::invalid_argument if
+                                // no conversion could be performed; we catch
+                                // it for better diagnosis
+                                throw extension_error(402, "array index is '" + reference_token + "', but must be a number");
+                            }
                         }
                         break;
                     }
 
                     default:
                     {
-                        throw std::out_of_range("unresolved reference token '" + reference_token + "'");
+                        throw extension_error(405, "unresolved reference token '" + reference_token + "'");
                     }
                 }
             }
@@ -9142,15 +9160,15 @@ basic_json_parser_63:
                         if (reference_token == "-")
                         {
                             // "-" always fails the range check
-                            throw std::out_of_range("array index '-' (" +
-                                                    std::to_string(ptr->m_value.array->size()) +
-                                                    ") is out of range");
+                            throw extension_error(406, "array index '-' (" +
+                                                  std::to_string(ptr->m_value.array->size()) +
+                                                  ") is out of range");
                         }
 
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            throw std::domain_error("array index must not begin with '0'");
+                            throw extension_error(402, "array index must not begin with '0'");
                         }
 
                         // note: at performs range check
@@ -9160,7 +9178,7 @@ basic_json_parser_63:
 
                     default:
                     {
-                        throw std::out_of_range("unresolved reference token '" + reference_token + "'");
+                        throw extension_error(405, "unresolved reference token '" + reference_token + "'");
                     }
                 }
             }
@@ -9194,15 +9212,15 @@ basic_json_parser_63:
                         if (reference_token == "-")
                         {
                             // "-" cannot be used for const access
-                            throw std::out_of_range("array index '-' (" +
-                                                    std::to_string(ptr->m_value.array->size()) +
-                                                    ") is out of range");
+                            throw extension_error(406, "array index '-' (" +
+                                                  std::to_string(ptr->m_value.array->size()) +
+                                                  ") is out of range");
                         }
 
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            throw std::domain_error("array index must not begin with '0'");
+                            throw extension_error(402, "array index must not begin with '0'");
                         }
 
                         // use unchecked array access
@@ -9212,7 +9230,7 @@ basic_json_parser_63:
 
                     default:
                     {
-                        throw std::out_of_range("unresolved reference token '" + reference_token + "'");
+                        throw extension_error(405, "unresolved reference token '" + reference_token + "'");
                     }
                 }
             }
@@ -9238,15 +9256,15 @@ basic_json_parser_63:
                         if (reference_token == "-")
                         {
                             // "-" always fails the range check
-                            throw std::out_of_range("array index '-' (" +
-                                                    std::to_string(ptr->m_value.array->size()) +
-                                                    ") is out of range");
+                            throw extension_error(406, "array index '-' (" +
+                                                  std::to_string(ptr->m_value.array->size()) +
+                                                  ") is out of range");
                         }
 
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            throw std::domain_error("array index must not begin with '0'");
+                            throw extension_error(402, "array index must not begin with '0'");
                         }
 
                         // note: at performs range check
@@ -9256,7 +9274,7 @@ basic_json_parser_63:
 
                     default:
                     {
-                        throw std::out_of_range("unresolved reference token '" + reference_token + "'");
+                        throw extension_error(405, "unresolved reference token '" + reference_token + "'");
                     }
                 }
             }
@@ -9278,7 +9296,7 @@ basic_json_parser_63:
             // check if nonempty reference string begins with slash
             if (reference_string[0] != '/')
             {
-                throw std::domain_error("JSON pointer must be empty or begin with '/'");
+                throw extension_error(403, "JSON pointer must be empty or begin with '/'");
             }
 
             // extract the reference tokens:
@@ -9313,7 +9331,7 @@ basic_json_parser_63:
                             (reference_token[pos + 1] != '0' and
                              reference_token[pos + 1] != '1'))
                     {
-                        throw std::domain_error("escape error: '~' must be followed with '0' or '1'");
+                        throw extension_error(404, "escape error: '~' must be followed with '0' or '1'");
                     }
                 }
 
@@ -9441,7 +9459,7 @@ basic_json_parser_63:
         {
             if (not value.is_object())
             {
-                throw std::domain_error("only objects can be unflattened");
+                throw extension_error(412, "only objects can be unflattened");
             }
 
             basic_json result;
@@ -9451,7 +9469,7 @@ basic_json_parser_63:
             {
                 if (not element.second.is_primitive())
                 {
-                    throw std::domain_error("values in object must be primitive");
+                    throw extension_error(413, "values in object must be primitive");
                 }
 
                 // assign value to reference pointed to by JSON pointer; Note
@@ -9503,8 +9521,8 @@ basic_json_parser_63:
     @complexity Constant.
 
     @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw extension_error (402)  if an array index begins with '0' or is not
+    a number
 
     @liveexample{The behavior is shown in the example.,operatorjson_pointer}
 
@@ -9530,8 +9548,8 @@ basic_json_parser_63:
     @complexity Constant.
 
     @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw extension_error (402)  if an array index begins with '0' or is not
+    a number
 
     @liveexample{The behavior is shown in the example.,operatorjson_pointer_const}
 
@@ -9555,8 +9573,8 @@ basic_json_parser_63:
     @complexity Constant.
 
     @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw extension_error (402)  if an array index begins with '0' or is not
+    a number
 
     @liveexample{The behavior is shown in the example.,at_json_pointer}
 
@@ -9580,8 +9598,8 @@ basic_json_parser_63:
     @complexity Constant.
 
     @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw extension_error (402)  if an array index begins with '0' or is not
+    a number
 
     @liveexample{The behavior is shown in the example.,at_json_pointer_const}
 
@@ -9681,8 +9699,11 @@ basic_json_parser_63:
     @throw std::out_of_range if a JSON pointer inside the patch could not
     be resolved successfully in the current JSON value; example: `"key baz
     not found"`
-    @throw invalid_argument if the JSON patch is malformed (e.g., mandatory
-    attributes are missing); example: `"operation add must have member path"`
+    @throw extension_error (408) if the JSON patch is malformed (e.g.,
+    mandatory attributes are missing); example: `"operation add must have
+    string member path"`
+    @throw extension_error (407) if the JSON patch is malformed; example:
+    `"JSON patch must be an array of objects"`
 
     @complexity Linear in the size of the JSON value and the length of the
     JSON patch. As usually only a fraction of the JSON value is affected by
@@ -9832,7 +9853,7 @@ basic_json_parser_63:
         if (not json_patch.is_array())
         {
             // a JSON patch must be an array of objects
-            throw std::invalid_argument("JSON patch must be an array of objects");
+            throw extension_error(407, "JSON patch must be an array of objects");
         }
 
         // iterate and apply th eoperations
@@ -9852,13 +9873,13 @@ basic_json_parser_63:
                 // check if desired value is present
                 if (it == val.m_value.object->end())
                 {
-                    throw std::invalid_argument(error_msg + " must have member '" + member + "'");
+                    throw extension_error(408, error_msg + " must have string member '" + member + "'");
                 }
 
                 // check if result is of type string
                 if (string_type and not it->second.is_string())
                 {
-                    throw std::invalid_argument(error_msg + " must have string member '" + member + "'");
+                    throw extension_error(408, error_msg + " must have string member '" + member + "'");
                 }
 
                 // no error: return value
@@ -9868,7 +9889,7 @@ basic_json_parser_63:
             // type check
             if (not val.is_object())
             {
-                throw std::invalid_argument("JSON patch must be an array of objects");
+                throw extension_error(407, "JSON patch must be an array of objects");
             }
 
             // collect mandatory members
@@ -9941,7 +9962,7 @@ basic_json_parser_63:
                     // throw an exception if test fails
                     if (not success)
                     {
-                        throw std::domain_error("unsuccessful: " + val.dump());
+                        throw extension_error(410, "unsuccessful: " + val.dump());
                     }
 
                     break;
@@ -9951,7 +9972,7 @@ basic_json_parser_63:
                 {
                     // op must be "add", "remove", "replace", "move", "copy", or
                     // "test"
-                    throw std::invalid_argument("operation value '" + op + "' is invalid");
+                    throw extension_error(409, "operation value '" + op + "' is invalid");
                 }
             }
         }
