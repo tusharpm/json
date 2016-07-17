@@ -2407,6 +2407,34 @@ class basic_json
     }
 
     /*!
+    @brief return whether value is a signed integer number
+
+    This function returns true iff the JSON value is a signed integer
+    number. This excludes floating-point and (unsigned) integer values.
+
+    @return `true` if type is a signed integer number, `false` otherwise.
+
+    @complexity Constant.
+
+    @exceptionsafety No-throw guarantee: this member function never throws
+    exceptions.
+
+    @liveexample{The following code exemplifies `is_number_signed()` for all
+    JSON types.,is_number_signed}
+
+    @sa @ref is_number() -- check if value is a number
+    @sa @ref is_number_integer() -- check if value is an integer or unsigned
+    integer number
+    @sa @ref is_number_float() -- check if value is a floating-point number
+
+    @since version 3.0.0
+    */
+    constexpr bool is_number_signed() const noexcept
+    {
+        return m_type == value_t::number_integer;
+    }
+
+    /*!
     @brief return whether value is an unsigned integer number
 
     This function returns true iff the JSON value is an unsigned integer
@@ -2813,13 +2841,13 @@ class basic_json
     /// get a pointer to the value (integer number)
     number_integer_t* get_impl_ptr(number_integer_t*) noexcept
     {
-        return is_number_integer() ? &m_value.number_integer : nullptr;
+        return is_number_signed() ? &m_value.number_integer : nullptr;
     }
 
     /// get a pointer to the value (integer number)
     constexpr const number_integer_t* get_impl_ptr(const number_integer_t*) const noexcept
     {
-        return is_number_integer() ? &m_value.number_integer : nullptr;
+        return is_number_signed() ? &m_value.number_integer : nullptr;
     }
 
     /// get a pointer to the value (unsigned number)
@@ -2854,8 +2882,9 @@ class basic_json
 
     @tparam ThisType will be deduced as `basic_json` or `const basic_json`
 
-    @throw std::domain_error if ReferenceType does not match underlying value
-    type of the current JSON
+    @throw type_error (310) if ReferenceType does not match underlying value
+    type of the current JSON; example: `"incompatible ReferenceType for
+    get_ref, actual type is object"`
     */
     template<typename ReferenceType, typename ThisType>
     static ReferenceType get_ref_impl(ThisType& obj)
@@ -2870,8 +2899,8 @@ class basic_json
         }
         else
         {
-            throw std::domain_error("incompatible ReferenceType for get_ref, actual type is " +
-                                    obj.type_name());
+            throw type_error(310, "incompatible ReferenceType for get_ref, actual type is " +
+                             obj.type_name());
         }
     }
 
