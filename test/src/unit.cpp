@@ -944,9 +944,9 @@ TEST_CASE("constructors")
             SECTION("object with error")
             {
                 CHECK_THROWS_AS(json::object({ {"one", 1}, {"two", 1u}, {"three", 2.2}, {"four", false}, 13 }),
-                std::logic_error);
+                json::type_error);
                 CHECK_THROWS_WITH(json::object({ {"one", 1}, {"two", 1u}, {"three", 2.2}, {"four", false}, 13 }),
-                "cannot create object from initializer list");
+                "[except.301] cannot create object from initializer list");
             }
 
             SECTION("empty array")
@@ -1846,28 +1846,28 @@ TEST_CASE("value conversion")
 
         SECTION("exception in case of a non-object type")
         {
-            CHECK_THROWS_AS(json(json::value_t::null).get<json::object_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::array).get<json::object_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::string).get<json::object_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::object_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::object_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::object_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::object_t>(), std::logic_error);
+            CHECK_THROWS_AS(json(json::value_t::null).get<json::object_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::array).get<json::object_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::string).get<json::object_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::object_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::object_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::object_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::object_t>(), json::type_error);
 
             CHECK_THROWS_WITH(json(json::value_t::null).get<json::object_t>(),
-                              "type must be object, but is null");
+                              "[except.302] type must be object, but is null");
             CHECK_THROWS_WITH(json(json::value_t::array).get<json::object_t>(),
-                              "type must be object, but is array");
+                              "[except.302] type must be object, but is array");
             CHECK_THROWS_WITH(json(json::value_t::string).get<json::object_t>(),
-                              "type must be object, but is string");
+                              "[except.302] type must be object, but is string");
             CHECK_THROWS_WITH(json(json::value_t::boolean).get<json::object_t>(),
-                              "type must be object, but is boolean");
+                              "[except.302] type must be object, but is boolean");
             CHECK_THROWS_WITH(json(json::value_t::number_integer).get<json::object_t>(),
-                              "type must be object, but is number");
+                              "[except.302] type must be object, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_unsigned).get<json::object_t>(),
-                              "type must be object, but is number");
+                              "[except.302] type must be object, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_float).get<json::object_t>(),
-                              "type must be object, but is number");
+                              "[except.302] type must be object, but is number");
         }
     }
 
@@ -1944,28 +1944,28 @@ TEST_CASE("value conversion")
 
         SECTION("exception in case of a non-array type")
         {
-            CHECK_THROWS_AS(json(json::value_t::null).get<json::array_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::object).get<json::array_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::string).get<json::array_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::array_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::array_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::array_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::array_t>(), std::logic_error);
+            CHECK_THROWS_AS(json(json::value_t::null).get<json::array_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::object).get<json::array_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::string).get<json::array_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::array_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::array_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::array_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::array_t>(), json::type_error);
 
             CHECK_THROWS_WITH(json(json::value_t::null).get<json::array_t>(),
-                              "type must be array, but is null");
+                              "[except.302] type must be array, but is null");
             CHECK_THROWS_WITH(json(json::value_t::object).get<json::array_t>(),
-                              "type must be array, but is object");
+                              "[except.302] type must be array, but is object");
             CHECK_THROWS_WITH(json(json::value_t::string).get<json::array_t>(),
-                              "type must be array, but is string");
+                              "[except.302] type must be array, but is string");
             CHECK_THROWS_WITH(json(json::value_t::boolean).get<json::array_t>(),
-                              "type must be array, but is boolean");
+                              "[except.302] type must be array, but is boolean");
             CHECK_THROWS_WITH(json(json::value_t::number_integer).get<json::array_t>(),
-                              "type must be array, but is number");
+                              "[except.302] type must be array, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_unsigned).get<json::array_t>(),
-                              "type must be array, but is number");
+                              "[except.302] type must be array, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_float).get<json::array_t>(),
-                              "type must be array, but is number");
+                              "[except.302] type must be array, but is number");
         }
     }
 
@@ -2024,28 +2024,28 @@ TEST_CASE("value conversion")
 
         SECTION("exception in case of a non-string type")
         {
-            CHECK_THROWS_AS(json(json::value_t::null).get<json::string_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::object).get<json::string_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::array).get<json::string_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::string_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::string_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::string_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::string_t>(), std::logic_error);
+            CHECK_THROWS_AS(json(json::value_t::null).get<json::string_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::object).get<json::string_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::array).get<json::string_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::string_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::string_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::string_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::string_t>(), json::type_error);
 
             CHECK_THROWS_WITH(json(json::value_t::null).get<json::string_t>(),
-                              "type must be string, but is null");
+                              "[except.302] type must be string, but is null");
             CHECK_THROWS_WITH(json(json::value_t::object).get<json::string_t>(),
-                              "type must be string, but is object");
+                              "[except.302] type must be string, but is object");
             CHECK_THROWS_WITH(json(json::value_t::array).get<json::string_t>(),
-                              "type must be string, but is array");
+                              "[except.302] type must be string, but is array");
             CHECK_THROWS_WITH(json(json::value_t::boolean).get<json::string_t>(),
-                              "type must be string, but is boolean");
+                              "[except.302] type must be string, but is boolean");
             CHECK_THROWS_WITH(json(json::value_t::number_integer).get<json::string_t>(),
-                              "type must be string, but is number");
+                              "[except.302] type must be string, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_unsigned).get<json::string_t>(),
-                              "type must be string, but is number");
+                              "[except.302] type must be string, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_float).get<json::string_t>(),
-                              "type must be string, but is number");
+                              "[except.302] type must be string, but is number");
         }
     }
 
@@ -2086,28 +2086,28 @@ TEST_CASE("value conversion")
 
         SECTION("exception in case of a non-string type")
         {
-            CHECK_THROWS_AS(json(json::value_t::null).get<json::boolean_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::object).get<json::boolean_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::array).get<json::boolean_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::string).get<json::boolean_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::boolean_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::boolean_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::boolean_t>(), std::logic_error);
+            CHECK_THROWS_AS(json(json::value_t::null).get<json::boolean_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::object).get<json::boolean_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::array).get<json::boolean_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::string).get<json::boolean_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_integer).get<json::boolean_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_unsigned).get<json::boolean_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::number_float).get<json::boolean_t>(), json::type_error);
 
             CHECK_THROWS_WITH(json(json::value_t::null).get<json::boolean_t>(),
-                              "type must be boolean, but is null");
+                              "[except.302] type must be boolean, but is null");
             CHECK_THROWS_WITH(json(json::value_t::object).get<json::boolean_t>(),
-                              "type must be boolean, but is object");
+                              "[except.302] type must be boolean, but is object");
             CHECK_THROWS_WITH(json(json::value_t::array).get<json::boolean_t>(),
-                              "type must be boolean, but is array");
+                              "[except.302] type must be boolean, but is array");
             CHECK_THROWS_WITH(json(json::value_t::string).get<json::boolean_t>(),
-                              "type must be boolean, but is string");
+                              "[except.302] type must be boolean, but is string");
             CHECK_THROWS_WITH(json(json::value_t::number_integer).get<json::boolean_t>(),
-                              "type must be boolean, but is number");
+                              "[except.302] type must be boolean, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_unsigned).get<json::boolean_t>(),
-                              "type must be boolean, but is number");
+                              "[except.302] type must be boolean, but is number");
             CHECK_THROWS_WITH(json(json::value_t::number_float).get<json::boolean_t>(),
-                              "type must be boolean, but is number");
+                              "[except.302] type must be boolean, but is number");
         }
     }
 
@@ -2342,22 +2342,22 @@ TEST_CASE("value conversion")
 
         SECTION("exception in case of a non-number type")
         {
-            CHECK_THROWS_AS(json(json::value_t::null).get<json::number_integer_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::object).get<json::number_integer_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::array).get<json::number_integer_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::string).get<json::number_integer_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::number_integer_t>(), std::logic_error);
+            CHECK_THROWS_AS(json(json::value_t::null).get<json::number_integer_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::object).get<json::number_integer_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::array).get<json::number_integer_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::string).get<json::number_integer_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::number_integer_t>(), json::type_error);
 
             CHECK_THROWS_WITH(json(json::value_t::null).get<json::number_integer_t>(),
-                              "type must be number, but is null");
+                              "[except.302] type must be number, but is null");
             CHECK_THROWS_WITH(json(json::value_t::object).get<json::number_integer_t>(),
-                              "type must be number, but is object");
+                              "[except.302] type must be number, but is object");
             CHECK_THROWS_WITH(json(json::value_t::array).get<json::number_integer_t>(),
-                              "type must be number, but is array");
+                              "[except.302] type must be number, but is array");
             CHECK_THROWS_WITH(json(json::value_t::string).get<json::number_integer_t>(),
-                              "type must be number, but is string");
+                              "[except.302] type must be number, but is string");
             CHECK_THROWS_WITH(json(json::value_t::boolean).get<json::number_integer_t>(),
-                              "type must be number, but is boolean");
+                              "[except.302] type must be number, but is boolean");
 
             CHECK_NOTHROW(json(json::value_t::number_float).get<json::number_integer_t>());
             CHECK_NOTHROW(json(json::value_t::number_float).get<json::number_unsigned_t>());
@@ -2601,22 +2601,22 @@ TEST_CASE("value conversion")
 
         SECTION("exception in case of a non-string type")
         {
-            CHECK_THROWS_AS(json(json::value_t::null).get<json::number_float_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::object).get<json::number_float_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::array).get<json::number_float_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::string).get<json::number_float_t>(), std::logic_error);
-            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::number_float_t>(), std::logic_error);
+            CHECK_THROWS_AS(json(json::value_t::null).get<json::number_float_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::object).get<json::number_float_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::array).get<json::number_float_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::string).get<json::number_float_t>(), json::type_error);
+            CHECK_THROWS_AS(json(json::value_t::boolean).get<json::number_float_t>(), json::type_error);
 
             CHECK_THROWS_WITH(json(json::value_t::null).get<json::number_float_t>(),
-                              "type must be number, but is null");
+                              "[except.302] type must be number, but is null");
             CHECK_THROWS_WITH(json(json::value_t::object).get<json::number_float_t>(),
-                              "type must be number, but is object");
+                              "[except.302] type must be number, but is object");
             CHECK_THROWS_WITH(json(json::value_t::array).get<json::number_float_t>(),
-                              "type must be number, but is array");
+                              "[except.302] type must be number, but is array");
             CHECK_THROWS_WITH(json(json::value_t::string).get<json::number_float_t>(),
-                              "type must be number, but is string");
+                              "[except.302] type must be number, but is string");
             CHECK_THROWS_WITH(json(json::value_t::boolean).get<json::number_float_t>(),
-                              "type must be number, but is boolean");
+                              "[except.302] type must be number, but is boolean");
 
             CHECK_NOTHROW(json(json::value_t::number_integer).get<json::number_float_t>());
             CHECK_NOTHROW(json(json::value_t::number_unsigned).get<json::number_float_t>());
@@ -2698,8 +2698,9 @@ TEST_CASE("value conversion")
 
             SECTION("exception in case of a non-object type")
             {
-                CHECK_THROWS_AS((json().get<std::map<std::string, int>>()), std::logic_error);
-                CHECK_THROWS_WITH((json().get<std::map<std::string, int>>()), "type must be object, but is null");
+                CHECK_THROWS_AS((json().get<std::map<std::string, int>>()), json::type_error);
+                CHECK_THROWS_WITH((json().get<std::map<std::string, int>>()),
+                                  "[except.302] type must be object, but is null");
             }
         }
 
@@ -2767,15 +2768,19 @@ TEST_CASE("value conversion")
 
             SECTION("exception in case of a non-object type")
             {
-                CHECK_THROWS_AS((json().get<std::list<int>>()), std::logic_error);
-                CHECK_THROWS_AS((json().get<std::vector<int>>()), std::logic_error);
-                CHECK_THROWS_AS((json().get<std::vector<json>>()), std::logic_error);
-                CHECK_THROWS_AS((json().get<std::list<json>>()), std::logic_error);
+                CHECK_THROWS_AS((json().get<std::list<int>>()), json::type_error);
+                CHECK_THROWS_AS((json().get<std::vector<int>>()), json::type_error);
+                CHECK_THROWS_AS((json().get<std::vector<json>>()), json::type_error);
+                CHECK_THROWS_AS((json().get<std::list<json>>()), json::type_error);
 
-                CHECK_THROWS_WITH((json().get<std::list<int>>()), "type must be array, but is null");
-                CHECK_THROWS_WITH((json().get<std::vector<int>>()), "type must be array, but is null");
-                CHECK_THROWS_WITH((json().get<std::vector<json>>()), "type must be array, but is null");
-                CHECK_THROWS_WITH((json().get<std::list<json>>()), "type must be array, but is null");
+                CHECK_THROWS_WITH((json().get<std::list<int>>()),
+                                  "[except.302] type must be array, but is null");
+                CHECK_THROWS_WITH((json().get<std::vector<int>>()),
+                                  "[except.302] type must be array, but is null");
+                CHECK_THROWS_WITH((json().get<std::vector<json>>()),
+                                  "[except.302] type must be array, but is null");
+                CHECK_THROWS_WITH((json().get<std::list<json>>()),
+                                  "[except.302] type must be array, but is null");
             }
         }
     }
@@ -3227,77 +3232,77 @@ TEST_CASE("element access")
                 {
                     json j_nonarray(json::value_t::null);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray.at(0), std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const.at(0), std::domain_error);
+                    CHECK_THROWS_AS(j_nonarray.at(0), json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const.at(0), json::type_error);
 
-                    CHECK_THROWS_WITH(j_nonarray.at(0), "cannot use at() with null");
-                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "cannot use at() with null");
+                    CHECK_THROWS_WITH(j_nonarray.at(0), "[except.303] cannot use at() with null");
+                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "[except.303] cannot use at() with null");
                 }
 
                 SECTION("boolean")
                 {
                     json j_nonarray(json::value_t::boolean);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray.at(0), std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const.at(0), std::domain_error);
+                    CHECK_THROWS_AS(j_nonarray.at(0), json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const.at(0), json::type_error);
 
-                    CHECK_THROWS_WITH(j_nonarray.at(0), "cannot use at() with boolean");
-                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "cannot use at() with boolean");
+                    CHECK_THROWS_WITH(j_nonarray.at(0), "[except.303] cannot use at() with boolean");
+                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "[except.303] cannot use at() with boolean");
                 }
 
                 SECTION("string")
                 {
                     json j_nonarray(json::value_t::string);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray.at(0), std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const.at(0), std::domain_error);
+                    CHECK_THROWS_AS(j_nonarray.at(0), json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const.at(0), json::type_error);
 
-                    CHECK_THROWS_WITH(j_nonarray.at(0), "cannot use at() with string");
-                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "cannot use at() with string");
+                    CHECK_THROWS_WITH(j_nonarray.at(0), "[except.303] cannot use at() with string");
+                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "[except.303] cannot use at() with string");
                 }
 
                 SECTION("object")
                 {
                     json j_nonarray(json::value_t::object);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray.at(0), std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const.at(0), std::domain_error);
+                    CHECK_THROWS_AS(j_nonarray.at(0), json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const.at(0), json::type_error);
 
-                    CHECK_THROWS_WITH(j_nonarray.at(0), "cannot use at() with object");
-                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "cannot use at() with object");
+                    CHECK_THROWS_WITH(j_nonarray.at(0), "[except.303] cannot use at() with object");
+                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "[except.303] cannot use at() with object");
                 }
 
                 SECTION("number (integer)")
                 {
                     json j_nonarray(json::value_t::number_integer);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray.at(0), std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const.at(0), std::domain_error);
+                    CHECK_THROWS_AS(j_nonarray.at(0), json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const.at(0), json::type_error);
 
-                    CHECK_THROWS_WITH(j_nonarray.at(0), "cannot use at() with number");
-                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonarray.at(0), "[except.303] cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "[except.303] cannot use at() with number");
                 }
 
                 SECTION("number (unsigned)")
                 {
                     json j_nonarray(json::value_t::number_unsigned);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray.at(0), std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const.at(0), std::domain_error);
+                    CHECK_THROWS_AS(j_nonarray.at(0), json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const.at(0), json::type_error);
 
-                    CHECK_THROWS_WITH(j_nonarray.at(0), "cannot use at() with number");
-                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonarray.at(0), "[except.303] cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "[except.303] cannot use at() with number");
                 }
 
                 SECTION("number (floating-point)")
                 {
                     json j_nonarray(json::value_t::number_float);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray.at(0), std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const.at(0), std::domain_error);
+                    CHECK_THROWS_AS(j_nonarray.at(0), json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const.at(0), json::type_error);
 
-                    CHECK_THROWS_WITH(j_nonarray.at(0), "cannot use at() with number");
-                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonarray.at(0), "[except.303] cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonarray_const.at(0), "[except.303] cannot use at() with number");
                 }
             }
         }
@@ -3342,8 +3347,8 @@ TEST_CASE("element access")
                         json j_nonarray(json::value_t::null);
                         const json j_nonarray_const(j_nonarray);
                         CHECK_NOTHROW(j_nonarray[0]);
-                        CHECK_THROWS_AS(j_nonarray_const[0], std::domain_error);
-                        CHECK_THROWS_WITH(j_nonarray_const[0], "cannot use operator[] with null");
+                        CHECK_THROWS_AS(j_nonarray_const[0], json::type_error);
+                        CHECK_THROWS_WITH(j_nonarray_const[0], "[except.304] cannot use operator[] with null");
                     }
 
                     SECTION("implicit transformation to properly filled array")
@@ -3358,60 +3363,60 @@ TEST_CASE("element access")
                 {
                     json j_nonarray(json::value_t::boolean);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray[0], std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const[0], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonarray[0], "cannot use operator[] with boolean");
-                    CHECK_THROWS_WITH(j_nonarray_const[0], "cannot use operator[] with boolean");
+                    CHECK_THROWS_AS(j_nonarray[0], json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const[0], json::type_error);
+                    CHECK_THROWS_WITH(j_nonarray[0], "[except.304] cannot use operator[] with boolean");
+                    CHECK_THROWS_WITH(j_nonarray_const[0], "[except.304] cannot use operator[] with boolean");
                 }
 
                 SECTION("string")
                 {
                     json j_nonarray(json::value_t::string);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray[0], std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const[0], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonarray[0], "cannot use operator[] with string");
-                    CHECK_THROWS_WITH(j_nonarray_const[0], "cannot use operator[] with string");
+                    CHECK_THROWS_AS(j_nonarray[0], json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const[0], json::type_error);
+                    CHECK_THROWS_WITH(j_nonarray[0], "[except.304] cannot use operator[] with string");
+                    CHECK_THROWS_WITH(j_nonarray_const[0], "[except.304] cannot use operator[] with string");
                 }
 
                 SECTION("object")
                 {
                     json j_nonarray(json::value_t::object);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray[0], std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const[0], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonarray[0], "cannot use operator[] with object");
-                    CHECK_THROWS_WITH(j_nonarray_const[0], "cannot use operator[] with object");
+                    CHECK_THROWS_AS(j_nonarray[0], json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const[0], json::type_error);
+                    CHECK_THROWS_WITH(j_nonarray[0], "[except.304] cannot use operator[] with object");
+                    CHECK_THROWS_WITH(j_nonarray_const[0], "[except.304] cannot use operator[] with object");
                 }
 
                 SECTION("number (integer)")
                 {
                     json j_nonarray(json::value_t::number_integer);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray[0], std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const[0], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonarray[0], "cannot use operator[] with number");
-                    CHECK_THROWS_WITH(j_nonarray_const[0], "cannot use operator[] with number");
+                    CHECK_THROWS_AS(j_nonarray[0], json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const[0], json::type_error);
+                    CHECK_THROWS_WITH(j_nonarray[0], "[except.304] cannot use operator[] with number");
+                    CHECK_THROWS_WITH(j_nonarray_const[0], "[except.304] cannot use operator[] with number");
                 }
 
                 SECTION("number (unsigned)")
                 {
                     json j_nonarray(json::value_t::number_unsigned);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray[0], std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const[0], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonarray[0], "cannot use operator[] with number");
-                    CHECK_THROWS_WITH(j_nonarray_const[0], "cannot use operator[] with number");
+                    CHECK_THROWS_AS(j_nonarray[0], json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const[0], json::type_error);
+                    CHECK_THROWS_WITH(j_nonarray[0], "[except.304] cannot use operator[] with number");
+                    CHECK_THROWS_WITH(j_nonarray_const[0], "[except.304] cannot use operator[] with number");
                 }
 
                 SECTION("number (floating-point)")
                 {
                     json j_nonarray(json::value_t::number_float);
                     const json j_nonarray_const(j_nonarray);
-                    CHECK_THROWS_AS(j_nonarray[0], std::domain_error);
-                    CHECK_THROWS_AS(j_nonarray_const[0], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonarray[0], "cannot use operator[] with number");
-                    CHECK_THROWS_WITH(j_nonarray_const[0], "cannot use operator[] with number");
+                    CHECK_THROWS_AS(j_nonarray[0], json::type_error);
+                    CHECK_THROWS_AS(j_nonarray_const[0], json::type_error);
+                    CHECK_THROWS_WITH(j_nonarray[0], "[except.304] cannot use operator[] with number");
+                    CHECK_THROWS_WITH(j_nonarray_const[0], "[except.304] cannot use operator[] with number");
                 }
             }
         }
@@ -3595,50 +3600,50 @@ TEST_CASE("element access")
                 SECTION("null")
                 {
                     json j_nonobject(json::value_t::null);
-                    CHECK_THROWS_AS(j_nonobject.erase(0), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase(0), "cannot use erase() with null");
+                    CHECK_THROWS_AS(j_nonobject.erase(0), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase(0), "[except.306] cannot use erase() with null");
                 }
 
                 SECTION("boolean")
                 {
                     json j_nonobject(json::value_t::boolean);
-                    CHECK_THROWS_AS(j_nonobject.erase(0), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase(0), "cannot use erase() with boolean");
+                    CHECK_THROWS_AS(j_nonobject.erase(0), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase(0), "[except.306] cannot use erase() with boolean");
                 }
 
                 SECTION("string")
                 {
                     json j_nonobject(json::value_t::string);
-                    CHECK_THROWS_AS(j_nonobject.erase(0), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase(0), "cannot use erase() with string");
+                    CHECK_THROWS_AS(j_nonobject.erase(0), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase(0), "[except.306] cannot use erase() with string");
                 }
 
                 SECTION("object")
                 {
                     json j_nonobject(json::value_t::object);
-                    CHECK_THROWS_AS(j_nonobject.erase(0), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase(0), "cannot use erase() with object");
+                    CHECK_THROWS_AS(j_nonobject.erase(0), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase(0), "[except.306] cannot use erase() with object");
                 }
 
                 SECTION("number (integer)")
                 {
                     json j_nonobject(json::value_t::number_integer);
-                    CHECK_THROWS_AS(j_nonobject.erase(0), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase(0), "cannot use erase() with number");
+                    CHECK_THROWS_AS(j_nonobject.erase(0), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase(0), "[except.306] cannot use erase() with number");
                 }
 
                 SECTION("number (unsigned)")
                 {
                     json j_nonobject(json::value_t::number_unsigned);
-                    CHECK_THROWS_AS(j_nonobject.erase(0), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase(0), "cannot use erase() with number");
+                    CHECK_THROWS_AS(j_nonobject.erase(0), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase(0), "[except.306] cannot use erase() with number");
                 }
 
                 SECTION("number (floating-point)")
                 {
                     json j_nonobject(json::value_t::number_float);
-                    CHECK_THROWS_AS(j_nonobject.erase(0), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase(0), "cannot use erase() with number");
+                    CHECK_THROWS_AS(j_nonobject.erase(0), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase(0), "[except.306] cannot use erase() with number");
                 }
             }
         }
@@ -3686,70 +3691,70 @@ TEST_CASE("element access")
                 {
                     json j_nonobject(json::value_t::null);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.at("foo"), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "cannot use at() with null");
-                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "cannot use at() with null");
+                    CHECK_THROWS_AS(j_nonobject.at("foo"), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "[except.303] cannot use at() with null");
+                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "[except.303] cannot use at() with null");
                 }
 
                 SECTION("boolean")
                 {
                     json j_nonobject(json::value_t::boolean);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.at("foo"), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "cannot use at() with boolean");
-                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "cannot use at() with boolean");
+                    CHECK_THROWS_AS(j_nonobject.at("foo"), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "[except.303] cannot use at() with boolean");
+                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "[except.303] cannot use at() with boolean");
                 }
 
                 SECTION("string")
                 {
                     json j_nonobject(json::value_t::string);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.at("foo"), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "cannot use at() with string");
-                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "cannot use at() with string");
+                    CHECK_THROWS_AS(j_nonobject.at("foo"), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "[except.303] cannot use at() with string");
+                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "[except.303] cannot use at() with string");
                 }
 
                 SECTION("array")
                 {
                     json j_nonobject(json::value_t::array);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.at("foo"), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "cannot use at() with array");
-                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "cannot use at() with array");
+                    CHECK_THROWS_AS(j_nonobject.at("foo"), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "[except.303] cannot use at() with array");
+                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "[except.303] cannot use at() with array");
                 }
 
                 SECTION("number (integer)")
                 {
                     json j_nonobject(json::value_t::number_integer);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.at("foo"), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "cannot use at() with number");
-                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "cannot use at() with number");
+                    CHECK_THROWS_AS(j_nonobject.at("foo"), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "[except.303] cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "[except.303] cannot use at() with number");
                 }
 
                 SECTION("number (unsigned)")
                 {
                     json j_nonobject(json::value_t::number_unsigned);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.at("foo"), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "cannot use at() with number");
-                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "cannot use at() with number");
+                    CHECK_THROWS_AS(j_nonobject.at("foo"), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "[except.303] cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "[except.303] cannot use at() with number");
                 }
 
                 SECTION("number (floating-point)")
                 {
                     json j_nonobject(json::value_t::number_float);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.at("foo"), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "cannot use at() with number");
-                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "cannot use at() with number");
+                    CHECK_THROWS_AS(j_nonobject.at("foo"), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.at("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.at("foo"), "[except.303] cannot use at() with number");
+                    CHECK_THROWS_WITH(j_nonobject_const.at("foo"), "[except.303] cannot use at() with number");
                 }
             }
         }
@@ -3809,70 +3814,71 @@ TEST_CASE("element access")
                 {
                     json j_nonobject(json::value_t::null);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "cannot use value() with null");
-                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "cannot use value() with null");
+                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "[except.305] cannot use value() with null");
+                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "[except.305] cannot use value() with null");
                 }
 
                 SECTION("boolean")
                 {
                     json j_nonobject(json::value_t::boolean);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "cannot use value() with boolean");
-                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "cannot use value() with boolean");
+                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "[except.305] cannot use value() with boolean");
+                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1),
+                                      "[except.305] cannot use value() with boolean");
                 }
 
                 SECTION("string")
                 {
                     json j_nonobject(json::value_t::string);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "cannot use value() with string");
-                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "cannot use value() with string");
+                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "[except.305] cannot use value() with string");
+                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "[except.305] cannot use value() with string");
                 }
 
                 SECTION("array")
                 {
                     json j_nonobject(json::value_t::array);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "cannot use value() with array");
-                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "cannot use value() with array");
+                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "[except.305] cannot use value() with array");
+                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "[except.305] cannot use value() with array");
                 }
 
                 SECTION("number (integer)")
                 {
                     json j_nonobject(json::value_t::number_integer);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "cannot use value() with number");
-                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "cannot use value() with number");
+                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "[except.305] cannot use value() with number");
+                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "[except.305] cannot use value() with number");
                 }
 
                 SECTION("number (unsigned)")
                 {
                     json j_nonobject(json::value_t::number_unsigned);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "cannot use value() with number");
-                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "cannot use value() with number");
+                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "[except.305] cannot use value() with number");
+                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "[except.305] cannot use value() with number");
                 }
 
                 SECTION("number (floating-point)")
                 {
                     json j_nonobject(json::value_t::number_float);
                     const json j_nonobject_const(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "cannot use value() with number");
-                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "cannot use value() with number");
+                    CHECK_THROWS_AS(j_nonobject.value("foo", 1), json::type_error);
+                    CHECK_THROWS_AS(j_nonobject_const.value("foo", 1), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.value("foo", 1), "[except.305] cannot use value() with number");
+                    CHECK_THROWS_WITH(j_nonobject_const.value("foo", 1), "[except.305] cannot use value() with number");
                 }
             }
         }
@@ -3946,106 +3952,120 @@ TEST_CASE("element access")
                     const json j_const_nonobject(j_nonobject);
                     CHECK_NOTHROW(j_nonobject["foo"]);
                     CHECK_NOTHROW(j_nonobject2[json::object_t::key_type("foo")]);
-                    CHECK_THROWS_AS(j_const_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_WITH(j_const_nonobject["foo"], "cannot use operator[] with null");
+                    CHECK_THROWS_AS(j_const_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_WITH(j_const_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with null");
                     CHECK_THROWS_WITH(j_const_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with null");
+                                      "[except.304] cannot use operator[] with null");
                 }
 
                 SECTION("boolean")
                 {
                     json j_nonobject(json::value_t::boolean);
                     const json j_const_nonobject(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject["foo"], "cannot use operator[] with boolean");
+                    CHECK_THROWS_AS(j_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with boolean");
                     CHECK_THROWS_WITH(j_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with boolean");
-                    CHECK_THROWS_WITH(j_const_nonobject["foo"], "cannot use operator[] with boolean");
+                                      "[except.304] cannot use operator[] with boolean");
+                    CHECK_THROWS_WITH(j_const_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with boolean");
                     CHECK_THROWS_WITH(j_const_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with boolean");
+                                      "[except.304] cannot use operator[] with boolean");
                 }
 
                 SECTION("string")
                 {
                     json j_nonobject(json::value_t::string);
                     const json j_const_nonobject(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject["foo"], "cannot use operator[] with string");
+                    CHECK_THROWS_AS(j_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with string");
                     CHECK_THROWS_WITH(j_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with string");
-                    CHECK_THROWS_WITH(j_const_nonobject["foo"], "cannot use operator[] with string");
+                                      "[except.304] cannot use operator[] with string");
+                    CHECK_THROWS_WITH(j_const_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with string");
                     CHECK_THROWS_WITH(j_const_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with string");
+                                      "[except.304] cannot use operator[] with string");
                 }
 
                 SECTION("array")
                 {
                     json j_nonobject(json::value_t::array);
                     const json j_const_nonobject(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject["foo"], "cannot use operator[] with array");
-                    CHECK_THROWS_WITH(j_nonobject[json::object_t::key_type("foo")], "cannot use operator[] with array");
-                    CHECK_THROWS_WITH(j_const_nonobject["foo"], "cannot use operator[] with array");
+                    CHECK_THROWS_AS(j_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with array");
+                    CHECK_THROWS_WITH(j_nonobject[json::object_t::key_type("foo")],
+                                      "[except.304] cannot use operator[] with array");
+                    CHECK_THROWS_WITH(j_const_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with array");
                     CHECK_THROWS_WITH(j_const_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with array");
+                                      "[except.304] cannot use operator[] with array");
                 }
 
                 SECTION("number (integer)")
                 {
                     json j_nonobject(json::value_t::number_integer);
                     const json j_const_nonobject(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject["foo"], "cannot use operator[] with number");
+                    CHECK_THROWS_AS(j_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with number");
                     CHECK_THROWS_WITH(j_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with number");
-                    CHECK_THROWS_WITH(j_const_nonobject["foo"], "cannot use operator[] with number");
+                                      "[except.304] cannot use operator[] with number");
+                    CHECK_THROWS_WITH(j_const_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with number");
                     CHECK_THROWS_WITH(j_const_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with number");
+                                      "[except.304] cannot use operator[] with number");
                 }
 
                 SECTION("number (unsigned)")
                 {
                     json j_nonobject(json::value_t::number_unsigned);
                     const json j_const_nonobject(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject["foo"], "cannot use operator[] with number");
+                    CHECK_THROWS_AS(j_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with number");
                     CHECK_THROWS_WITH(j_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with number");
-                    CHECK_THROWS_WITH(j_const_nonobject["foo"], "cannot use operator[] with number");
+                                      "[except.304] cannot use operator[] with number");
+                    CHECK_THROWS_WITH(j_const_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with number");
                     CHECK_THROWS_WITH(j_const_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with number");
+                                      "[except.304] cannot use operator[] with number");
                 }
 
                 SECTION("number (floating-point)")
                 {
                     json j_nonobject(json::value_t::number_float);
                     const json j_const_nonobject(j_nonobject);
-                    CHECK_THROWS_AS(j_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject["foo"], std::domain_error);
-                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject["foo"], "cannot use operator[] with number");
+                    CHECK_THROWS_AS(j_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject["foo"], json::type_error);
+                    CHECK_THROWS_AS(j_const_nonobject[json::object_t::key_type("foo")], json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with number");
                     CHECK_THROWS_WITH(j_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with number");
-                    CHECK_THROWS_WITH(j_const_nonobject["foo"], "cannot use operator[] with number");
+                                      "[except.304] cannot use operator[] with number");
+                    CHECK_THROWS_WITH(j_const_nonobject["foo"],
+                                      "[except.304] cannot use operator[] with number");
                     CHECK_THROWS_WITH(j_const_nonobject[json::object_t::key_type("foo")],
-                                      "cannot use operator[] with number");
+                                      "[except.304] cannot use operator[] with number");
                 }
             }
         }
@@ -4221,43 +4241,43 @@ TEST_CASE("element access")
                 SECTION("null")
                 {
                     json j_nonobject(json::value_t::null);
-                    CHECK_THROWS_AS(j_nonobject.erase("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "cannot use erase() with null");
+                    CHECK_THROWS_AS(j_nonobject.erase("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "[except.306] cannot use erase() with null");
                 }
 
                 SECTION("boolean")
                 {
                     json j_nonobject(json::value_t::boolean);
-                    CHECK_THROWS_AS(j_nonobject.erase("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "cannot use erase() with boolean");
+                    CHECK_THROWS_AS(j_nonobject.erase("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "[except.306] cannot use erase() with boolean");
                 }
 
                 SECTION("string")
                 {
                     json j_nonobject(json::value_t::string);
-                    CHECK_THROWS_AS(j_nonobject.erase("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "cannot use erase() with string");
+                    CHECK_THROWS_AS(j_nonobject.erase("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "[except.306] cannot use erase() with string");
                 }
 
                 SECTION("array")
                 {
                     json j_nonobject(json::value_t::array);
-                    CHECK_THROWS_AS(j_nonobject.erase("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "cannot use erase() with array");
+                    CHECK_THROWS_AS(j_nonobject.erase("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "[except.306] cannot use erase() with array");
                 }
 
                 SECTION("number (integer)")
                 {
                     json j_nonobject(json::value_t::number_integer);
-                    CHECK_THROWS_AS(j_nonobject.erase("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "cannot use erase() with number");
+                    CHECK_THROWS_AS(j_nonobject.erase("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "[except.306] cannot use erase() with number");
                 }
 
                 SECTION("number (floating-point)")
                 {
                     json j_nonobject(json::value_t::number_float);
-                    CHECK_THROWS_AS(j_nonobject.erase("foo"), std::domain_error);
-                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "cannot use erase() with number");
+                    CHECK_THROWS_AS(j_nonobject.erase("foo"), json::type_error);
+                    CHECK_THROWS_WITH(j_nonobject.erase("foo"), "[except.306] cannot use erase() with number");
                 }
             }
         }
@@ -4538,13 +4558,13 @@ TEST_CASE("element access")
             {
                 {
                     json j;
-                    CHECK_THROWS_AS(j.erase(j.begin()), std::domain_error);
-                    CHECK_THROWS_WITH(j.erase(j.begin()), "cannot use erase() with null");
+                    CHECK_THROWS_AS(j.erase(j.begin()), json::type_error);
+                    CHECK_THROWS_WITH(j.erase(j.begin()), "[except.306] cannot use erase() with null");
                 }
                 {
                     json j;
-                    CHECK_THROWS_AS(j.erase(j.cbegin()), std::domain_error);
-                    CHECK_THROWS_WITH(j.erase(j.begin()), "cannot use erase() with null");
+                    CHECK_THROWS_AS(j.erase(j.cbegin()), json::type_error);
+                    CHECK_THROWS_WITH(j.erase(j.begin()), "[except.306] cannot use erase() with null");
                 }
             }
 
@@ -4708,13 +4728,13 @@ TEST_CASE("element access")
             {
                 {
                     json j;
-                    CHECK_THROWS_AS(j.erase(j.begin(), j.end()), std::domain_error);
-                    CHECK_THROWS_WITH(j.erase(j.begin(), j.end()), "cannot use erase() with null");
+                    CHECK_THROWS_AS(j.erase(j.begin(), j.end()), json::type_error);
+                    CHECK_THROWS_WITH(j.erase(j.begin(), j.end()), "[except.306] cannot use erase() with null");
                 }
                 {
                     json j;
-                    CHECK_THROWS_AS(j.erase(j.cbegin(), j.cend()), std::domain_error);
-                    CHECK_THROWS_WITH(j.erase(j.cbegin(), j.cend()), "cannot use erase() with null");
+                    CHECK_THROWS_AS(j.erase(j.cbegin(), j.cend()), json::type_error);
+                    CHECK_THROWS_WITH(j.erase(j.cbegin(), j.cend()), "[except.306] cannot use erase() with null");
                 }
             }
 
@@ -7872,8 +7892,8 @@ TEST_CASE("modifiers")
                 SECTION("other type")
                 {
                     json j = 1;
-                    CHECK_THROWS_AS(j.push_back("Hello"), std::domain_error);
-                    CHECK_THROWS_WITH(j.push_back("Hello"), "cannot use push_back() with number");
+                    CHECK_THROWS_AS(j.push_back("Hello"), json::type_error);
+                    CHECK_THROWS_WITH(j.push_back("Hello"), "[except.307] cannot use push_back() with number");
                 }
             }
 
@@ -7902,8 +7922,8 @@ TEST_CASE("modifiers")
                 {
                     json j = 1;
                     json k("Hello");
-                    CHECK_THROWS_AS(j.push_back(k), std::domain_error);
-                    CHECK_THROWS_WITH(j.push_back(k), "cannot use push_back() with number");
+                    CHECK_THROWS_AS(j.push_back(k), json::type_error);
+                    CHECK_THROWS_WITH(j.push_back(k), "[except.307] cannot use push_back() with number");
                 }
             }
         }
@@ -7935,9 +7955,9 @@ TEST_CASE("modifiers")
             {
                 json j = 1;
                 json k("Hello");
-                CHECK_THROWS_AS(j.push_back(json::object_t::value_type({"one", 1})), std::domain_error);
+                CHECK_THROWS_AS(j.push_back(json::object_t::value_type({"one", 1})), json::type_error);
                 CHECK_THROWS_WITH(j.push_back(json::object_t::value_type({"one", 1})),
-                                  "cannot use push_back() with number");
+                                  "[except.307] cannot use push_back() with number");
             }
         }
 
@@ -7972,8 +7992,8 @@ TEST_CASE("modifiers")
                 CHECK(j == json({{"key1", 1}, {"key2", "bar"}}));
 
                 json k = {{"key1", 1}};
-                CHECK_THROWS_AS(k.push_back({1, 2, 3, 4}), std::domain_error);
-                CHECK_THROWS_WITH(k.push_back({1, 2, 3, 4}), "cannot use push_back() with object");
+                CHECK_THROWS_AS(k.push_back({1, 2, 3, 4}), json::type_error);
+                CHECK_THROWS_WITH(k.push_back({1, 2, 3, 4}), "[except.307] cannot use push_back() with object");
             }
         }
     }
@@ -8004,8 +8024,8 @@ TEST_CASE("modifiers")
                 SECTION("other type")
                 {
                     json j = 1;
-                    CHECK_THROWS_AS(j += "Hello", std::domain_error);
-                    CHECK_THROWS_WITH(j += "Hello", "cannot use push_back() with number");
+                    CHECK_THROWS_AS(j += "Hello", json::type_error);
+                    CHECK_THROWS_WITH(j += "Hello", "[except.307] cannot use push_back() with number");
                 }
             }
 
@@ -8034,8 +8054,8 @@ TEST_CASE("modifiers")
                 {
                     json j = 1;
                     json k("Hello");
-                    CHECK_THROWS_AS(j += k, std::domain_error);
-                    CHECK_THROWS_WITH(j += k, "cannot use push_back() with number");
+                    CHECK_THROWS_AS(j += k, json::type_error);
+                    CHECK_THROWS_WITH(j += k, "[except.307] cannot use push_back() with number");
                 }
             }
         }
@@ -8067,9 +8087,9 @@ TEST_CASE("modifiers")
             {
                 json j = 1;
                 json k("Hello");
-                CHECK_THROWS_AS(j += json::object_t::value_type({"one", 1}), std::domain_error);
+                CHECK_THROWS_AS(j += json::object_t::value_type({"one", 1}), json::type_error);
                 CHECK_THROWS_WITH(j += json::object_t::value_type({"one", 1}),
-                                  "cannot use push_back() with number");
+                                  "[except.307] cannot use push_back() with number");
             }
         }
 
@@ -8104,8 +8124,8 @@ TEST_CASE("modifiers")
                 CHECK(j == json({{"key1", 1}, {"key2", "bar"}}));
 
                 json k = {{"key1", 1}};
-                CHECK_THROWS_AS((k += {1, 2, 3, 4}), std::domain_error);
-                CHECK_THROWS_WITH((k += {1, 2, 3, 4}), "cannot use push_back() with object");
+                CHECK_THROWS_AS((k += {1, 2, 3, 4}), json::type_error);
+                CHECK_THROWS_WITH((k += {1, 2, 3, 4}), "[except.307] cannot use push_back() with object");
             }
         }
     }
@@ -8311,20 +8331,24 @@ TEST_CASE("modifiers")
             // call insert on a non-array type
             json j_nonarray = 3;
             json j_yet_another_array = {"first", "second"};
-            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), 10), std::domain_error);
-            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), j_value), std::domain_error);
-            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), 10, 11), std::domain_error);
+            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), 10), json::type_error);
+            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), j_value), json::type_error);
+            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), 10, 11), json::type_error);
             CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), j_yet_another_array.begin(),
-                                              j_yet_another_array.end()), std::domain_error);
-            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), {1, 2, 3, 4}), std::domain_error);
+                                              j_yet_another_array.end()), json::type_error);
+            CHECK_THROWS_AS(j_nonarray.insert(j_nonarray.end(), {1, 2, 3, 4}), json::type_error);
 
-            CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), 10), "cannot use insert() with number");
-            CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), j_value), "cannot use insert() with number");
-            CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), 10, 11), "cannot use insert() with number");
+            CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), 10),
+                              "[except.309] cannot use insert() with number");
+            CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), j_value),
+                              "[except.309] cannot use insert() with number");
+            CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), 10, 11),
+                              "[except.309] cannot use insert() with number");
             CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), j_yet_another_array.begin(),
-                                                j_yet_another_array.end()), "cannot use insert() with number");
+                                                j_yet_another_array.end()),
+                              "[except.309] cannot use insert() with number");
             CHECK_THROWS_WITH(j_nonarray.insert(j_nonarray.end(), {1, 2, 3, 4}),
-                              "cannot use insert() with number");
+                              "[except.309] cannot use insert() with number");
         }
     }
 
@@ -8376,8 +8400,8 @@ TEST_CASE("modifiers")
                 json j = 17;
                 json::array_t a = {"foo", "bar", "baz"};
 
-                CHECK_THROWS_AS(j.swap(a), std::domain_error);
-                CHECK_THROWS_WITH(j.swap(a), "cannot use swap() with number");
+                CHECK_THROWS_AS(j.swap(a), json::type_error);
+                CHECK_THROWS_WITH(j.swap(a), "[except.308] cannot use swap() with number");
             }
         }
 
@@ -8402,8 +8426,8 @@ TEST_CASE("modifiers")
                 json j = 17;
                 json::object_t o = {{"cow", "Kuh"}, {"chicken", "Huhn"}};
 
-                CHECK_THROWS_AS(j.swap(o), std::domain_error);
-                CHECK_THROWS_WITH(j.swap(o), "cannot use swap() with number");
+                CHECK_THROWS_AS(j.swap(o), json::type_error);
+                CHECK_THROWS_WITH(j.swap(o), "[except.308] cannot use swap() with number");
             }
         }
 
@@ -8428,8 +8452,8 @@ TEST_CASE("modifiers")
                 json j = 17;
                 json::string_t s = "Hallo Welt";
 
-                CHECK_THROWS_AS(j.swap(s), std::domain_error);
-                CHECK_THROWS_WITH(j.swap(s), "cannot use swap() with number");
+                CHECK_THROWS_AS(j.swap(s), json::type_error);
+                CHECK_THROWS_WITH(j.swap(s), "[except.308] cannot use swap() with number");
             }
         }
     }
