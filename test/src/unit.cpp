@@ -1499,6 +1499,7 @@ TEST_CASE("object inspection")
             CHECK(not j.is_number());
             CHECK(not j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(j.is_object());
             CHECK(not j.is_array());
@@ -1516,6 +1517,7 @@ TEST_CASE("object inspection")
             CHECK(not j.is_number());
             CHECK(not j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(not j.is_object());
             CHECK(j.is_array());
@@ -1533,6 +1535,7 @@ TEST_CASE("object inspection")
             CHECK(not j.is_number());
             CHECK(not j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(not j.is_object());
             CHECK(not j.is_array());
@@ -1550,6 +1553,7 @@ TEST_CASE("object inspection")
             CHECK(not j.is_number());
             CHECK(not j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(not j.is_object());
             CHECK(not j.is_array());
@@ -1567,6 +1571,7 @@ TEST_CASE("object inspection")
             CHECK(not j.is_number());
             CHECK(not j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(not j.is_object());
             CHECK(not j.is_array());
@@ -1584,6 +1589,7 @@ TEST_CASE("object inspection")
             CHECK(j.is_number());
             CHECK(j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(not j.is_object());
             CHECK(not j.is_array());
@@ -1601,6 +1607,7 @@ TEST_CASE("object inspection")
             CHECK(j.is_number());
             CHECK(j.is_number_integer());
             CHECK(j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(not j.is_object());
             CHECK(not j.is_array());
@@ -1618,6 +1625,7 @@ TEST_CASE("object inspection")
             CHECK(j.is_number());
             CHECK(not j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(j.is_number_float());
             CHECK(not j.is_object());
             CHECK(not j.is_array());
@@ -1635,6 +1643,7 @@ TEST_CASE("object inspection")
             CHECK(not j.is_number());
             CHECK(not j.is_number_integer());
             CHECK(not j.is_number_unsigned());
+            CHECK(not j.is_number_signed());
             CHECK(not j.is_number_float());
             CHECK(not j.is_object());
             CHECK(not j.is_array());
@@ -2983,7 +2992,7 @@ TEST_CASE("pointer access")
         CHECK(value.get_ptr<json::array_t*>() == nullptr);
         CHECK(value.get_ptr<json::string_t*>() == nullptr);
         CHECK(value.get_ptr<json::boolean_t*>() == nullptr);
-        CHECK(value.get_ptr<json::number_integer_t*>() != nullptr);
+        CHECK(value.get_ptr<json::number_integer_t*>() == nullptr);
         CHECK(value.get_ptr<json::number_unsigned_t*>() != nullptr);
         CHECK(value.get_ptr<json::number_float_t*>() == nullptr);
     }
@@ -3050,11 +3059,25 @@ TEST_CASE("reference access")
 
         // check if mismatching references throw correctly
         CHECK_NOTHROW(value.get_ref<json::object_t&>());
-        CHECK_THROWS(value.get_ref<json::array_t&>());
-        CHECK_THROWS(value.get_ref<json::string_t&>());
-        CHECK_THROWS(value.get_ref<json::boolean_t&>());
-        CHECK_THROWS(value.get_ref<json::number_integer_t&>());
-        CHECK_THROWS(value.get_ref<json::number_float_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::array_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::string_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::boolean_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_integer_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_unsigned_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_float_t&>(), json::type_error);
+
+        CHECK_THROWS_WITH(value.get_ref<json::array_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is object");
+        CHECK_THROWS_WITH(value.get_ref<json::string_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is object");
+        CHECK_THROWS_WITH(value.get_ref<json::boolean_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is object");
+        CHECK_THROWS_WITH(value.get_ref<json::number_integer_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is object");
+        CHECK_THROWS_WITH(value.get_ref<json::number_unsigned_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is object");
+        CHECK_THROWS_WITH(value.get_ref<json::number_float_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is object");
     }
 
     SECTION("const reference access to const object_t")
@@ -3086,12 +3109,26 @@ TEST_CASE("reference access")
         CHECK(p2 == value.get<test_type>());
 
         // check if mismatching references throw correctly
-        CHECK_THROWS(value.get_ref<json::object_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::object_t&>(), json::type_error);
         CHECK_NOTHROW(value.get_ref<json::array_t&>());
-        CHECK_THROWS(value.get_ref<json::string_t&>());
-        CHECK_THROWS(value.get_ref<json::boolean_t&>());
-        CHECK_THROWS(value.get_ref<json::number_integer_t&>());
-        CHECK_THROWS(value.get_ref<json::number_float_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::string_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::boolean_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_integer_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_unsigned_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_float_t&>(), json::type_error);
+
+        CHECK_THROWS_WITH(value.get_ref<json::object_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is array");
+        CHECK_THROWS_WITH(value.get_ref<json::string_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is array");
+        CHECK_THROWS_WITH(value.get_ref<json::boolean_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is array");
+        CHECK_THROWS_WITH(value.get_ref<json::number_integer_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is array");
+        CHECK_THROWS_WITH(value.get_ref<json::number_unsigned_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is array");
+        CHECK_THROWS_WITH(value.get_ref<json::number_float_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is array");
     }
 
     SECTION("reference access to string_t")
@@ -3109,12 +3146,26 @@ TEST_CASE("reference access")
         CHECK(p2 == value.get<test_type>());
 
         // check if mismatching references throw correctly
-        CHECK_THROWS(value.get_ref<json::object_t&>());
-        CHECK_THROWS(value.get_ref<json::array_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::object_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::array_t&>(), json::type_error);
         CHECK_NOTHROW(value.get_ref<json::string_t&>());
-        CHECK_THROWS(value.get_ref<json::boolean_t&>());
-        CHECK_THROWS(value.get_ref<json::number_integer_t&>());
-        CHECK_THROWS(value.get_ref<json::number_float_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::boolean_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_integer_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_unsigned_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_float_t&>(), json::type_error);
+
+        CHECK_THROWS_WITH(value.get_ref<json::object_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is string");
+        CHECK_THROWS_WITH(value.get_ref<json::array_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is string");
+        CHECK_THROWS_WITH(value.get_ref<json::boolean_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is string");
+        CHECK_THROWS_WITH(value.get_ref<json::number_integer_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is string");
+        CHECK_THROWS_WITH(value.get_ref<json::number_unsigned_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is string");
+        CHECK_THROWS_WITH(value.get_ref<json::number_float_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is string");
     }
 
     SECTION("reference access to boolean_t")
@@ -3132,12 +3183,26 @@ TEST_CASE("reference access")
         CHECK(p2 == value.get<test_type>());
 
         // check if mismatching references throw correctly
-        CHECK_THROWS(value.get_ref<json::object_t&>());
-        CHECK_THROWS(value.get_ref<json::array_t&>());
-        CHECK_THROWS(value.get_ref<json::string_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::object_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::array_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::string_t&>(), json::type_error);
         CHECK_NOTHROW(value.get_ref<json::boolean_t&>());
-        CHECK_THROWS(value.get_ref<json::number_integer_t&>());
-        CHECK_THROWS(value.get_ref<json::number_float_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::number_integer_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_unsigned_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_float_t&>(), json::type_error);
+
+        CHECK_THROWS_WITH(value.get_ref<json::object_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is boolean");
+        CHECK_THROWS_WITH(value.get_ref<json::array_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is boolean");
+        CHECK_THROWS_WITH(value.get_ref<json::string_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is boolean");
+        CHECK_THROWS_WITH(value.get_ref<json::number_integer_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is boolean");
+        CHECK_THROWS_WITH(value.get_ref<json::number_unsigned_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is boolean");
+        CHECK_THROWS_WITH(value.get_ref<json::number_float_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is boolean");
     }
 
     SECTION("reference access to number_integer_t")
@@ -3155,12 +3220,63 @@ TEST_CASE("reference access")
         CHECK(p2 == value.get<test_type>());
 
         // check if mismatching references throw correctly
-        CHECK_THROWS(value.get_ref<json::object_t&>());
-        CHECK_THROWS(value.get_ref<json::array_t&>());
-        CHECK_THROWS(value.get_ref<json::string_t&>());
-        CHECK_THROWS(value.get_ref<json::boolean_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::object_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::array_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::string_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::boolean_t&>(), json::type_error);
         CHECK_NOTHROW(value.get_ref<json::number_integer_t&>());
-        CHECK_THROWS(value.get_ref<json::number_float_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::number_unsigned_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_float_t&>(), json::type_error);
+
+        CHECK_THROWS_WITH(value.get_ref<json::object_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::array_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::string_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::boolean_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::number_unsigned_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::number_float_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+    }
+
+    SECTION("reference access to number_unsigned_t")
+    {
+        using test_type = json::number_unsigned_t;
+        json value = static_cast<json::number_unsigned_t>(23);
+
+        // check if references are returned correctly
+        test_type& p1 = value.get_ref<test_type&>();
+        CHECK(&p1 == value.get_ptr<test_type*>());
+        CHECK(p1 == value.get<test_type>());
+
+        const test_type& p2 = value.get_ref<const test_type&>();
+        CHECK(&p2 == value.get_ptr<const test_type*>());
+        CHECK(p2 == value.get<test_type>());
+
+        // check if mismatching references throw correctly
+        CHECK_THROWS_AS(value.get_ref<json::object_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::array_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::string_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::boolean_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_integer_t&>(), json::type_error);
+        CHECK_NOTHROW(value.get_ref<json::number_unsigned_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::number_float_t&>(), json::type_error);
+
+        CHECK_THROWS_WITH(value.get_ref<json::object_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::array_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::string_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::boolean_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::number_integer_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::number_float_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
     }
 
     SECTION("reference access to number_float_t")
@@ -3178,12 +3294,26 @@ TEST_CASE("reference access")
         CHECK(p2 == value.get<test_type>());
 
         // check if mismatching references throw correctly
-        CHECK_THROWS(value.get_ref<json::object_t&>());
-        CHECK_THROWS(value.get_ref<json::array_t&>());
-        CHECK_THROWS(value.get_ref<json::string_t&>());
-        CHECK_THROWS(value.get_ref<json::boolean_t&>());
-        CHECK_THROWS(value.get_ref<json::number_integer_t&>());
+        CHECK_THROWS_AS(value.get_ref<json::object_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::array_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::string_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::boolean_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_integer_t&>(), json::type_error);
+        CHECK_THROWS_AS(value.get_ref<json::number_unsigned_t&>(), json::type_error);
         CHECK_NOTHROW(value.get_ref<json::number_float_t&>());
+
+        CHECK_THROWS_WITH(value.get_ref<json::object_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::array_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::string_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::boolean_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::number_integer_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
+        CHECK_THROWS_WITH(value.get_ref<json::number_unsigned_t&>(),
+                          "[except.310] incompatible ReferenceType for get_ref, actual type is number");
     }
 }
 
