@@ -3603,7 +3603,7 @@ class basic_json
 
     @return const reference to the element at key @a key
 
-    @throw std::domain_error if JSON is not an object; example: `"cannot use
+    @throw type_error (304) if JSON is not an object; example: `"cannot use
     operator[] with null"`
 
     @complexity Logarithmic in the size of the container.
@@ -3814,7 +3814,7 @@ class basic_json
     or an empty array or object (undefined behavior, guarded by assertions).
     @post The JSON value remains unchanged.
 
-    @throw std::out_of_range when called on `null` value
+    @throw invalid_iterator (114) when called on `null` value
 
     @liveexample{The following code shows an example for `front()`.,front}
 
@@ -3856,7 +3856,7 @@ class basic_json
     or an empty array or object (undefined behavior, guarded by assertions).
     @post The JSON value remains unchanged.
 
-    @throw std::out_of_range when called on `null` value.
+    @throw invalid_iterator (114) when called on `null` value
 
     @liveexample{The following code shows an example for `back()`.,back}
 
