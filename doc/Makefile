@@ -1,5 +1,5 @@
 SRCDIR = ../src
-SED:=$(shell command -v gsed || sed)
+SED:=$(shell command -v gsed || which sed)
 
 all: doxygen
 
