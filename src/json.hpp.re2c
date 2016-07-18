@@ -7369,7 +7369,7 @@ class basic_json
         {
             m_content = reinterpret_cast<const lexer_char_t*>(s.c_str());
             assert(m_content != nullptr);
-            m_start = m_cursor = m_content;
+            m_buffer_start = m_start = m_cursor = m_content;
             m_limit = m_content + s.size();
         }
 
@@ -7381,7 +7381,7 @@ class basic_json
             getline(*m_stream, m_buffer);
             m_content = reinterpret_cast<const lexer_char_t*>(m_buffer.c_str());
             assert(m_content != nullptr);
-            m_start = m_cursor = m_content;
+            m_buffer_start = m_start = m_cursor = m_content;
             m_limit = m_content + m_buffer.size();
         }
 
@@ -7608,7 +7608,13 @@ class basic_json
             const auto offset_marker = m_marker - m_start;
             const auto offset_cursor = m_cursor - m_start;
 
-            m_buffer.erase(0, static_cast<size_t>(offset_start));
+            // get the size of the previous buffer
+            const auto last_buffer_size = static_cast<size_t>(offset_start);
+            // remmeber all buffer sizes so far
+            m_previous_buffer_sizes += last_buffer_size;
+
+            // delete previous buffer
+            m_buffer.erase(0, last_buffer_size);
             std::string line;
             assert(m_stream != nullptr);
             std::getline(*m_stream, line);
@@ -7616,10 +7622,19 @@ class basic_json
 
             m_content = reinterpret_cast<const lexer_char_t*>(m_buffer.c_str());
             assert(m_content != nullptr);
-            m_start  = m_content;
+            m_buffer_start = m_start  = m_content;
             m_marker = m_start + offset_marker;
             m_cursor = m_start + offset_cursor;
             m_limit  = m_start + m_buffer.size() - 1;
+        }
+
+        /// return the position (bytes) of the end of the last token
+        size_t last_token_pos() const noexcept
+        {
+            // m_buffer_start points to the first byte of the current buffer
+            // m_cursor points to the byte behind the current token
+            // m_previous_buffer_sizes contains the size the previous buffers
+            return static_cast<size_t>(m_cursor - m_buffer_start) + m_previous_buffer_sizes;
         }
 
         /// return string representation of last read token
@@ -7943,6 +7958,10 @@ class basic_json
         const lexer_char_t* m_cursor = nullptr;
         /// pointer to the end of the buffer
         const lexer_char_t* m_limit = nullptr;
+        /// pointer to the beginning of the buffer
+        const lexer_char_t* m_buffer_start = nullptr;
+        /// the size of the last buffer (before yyfill was called)
+        size_t m_previous_buffer_sizes = 0;
     };
 
     /*!
