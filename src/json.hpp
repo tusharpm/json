@@ -7400,15 +7400,15 @@ class basic_json
 
         @return string representation of the code point
 
-        @throw parse_error (210) if code point is > 0x10ffff; example: `"code
+        @throw parse_error (203) if code point is > 0x10ffff; example: `"code
         points above 0x10FFFF are invalid"`
-        @throw parse_error (209) if the low surrogate is invalid; example:
+        @throw parse_error (202) if the low surrogate is invalid; example:
         `"missing or wrong low surrogate"`
 
         @see <http://en.wikipedia.org/wiki/UTF-8#Sample_code>
         */
-        static string_t to_unicode(const std::size_t codepoint1,
-                                   const std::size_t codepoint2 = 0)
+        string_t to_unicode(const std::size_t codepoint1,
+                            const std::size_t codepoint2 = 0) const
         {
             // calculate the codepoint from the given code points
             std::size_t codepoint = codepoint1;
@@ -7431,7 +7431,8 @@ class basic_json
                 }
                 else
                 {
-                    throw parse_error(209, "missing or wrong low surrogate");
+                    const std::string error_msg = error_message() + "; missing or wrong low surrogate";
+                    throw parse_error(202, error_msg);
                 }
             }
 
@@ -7465,7 +7466,8 @@ class basic_json
             }
             else
             {
-                throw parse_error(210, "code points above 0x10FFFF are invalid");
+                const std::string error_msg = error_message() + "; code points above 0x10FFFF are invalid";
+                throw parse_error(203, error_msg);
             }
 
             return result;
@@ -7692,13 +7694,13 @@ class basic_json
 basic_json_parser_2:
                 ++m_cursor;
                 {
-                    return token_type::end_of_input;
+                    return last_token_type = token_type::end_of_input;
                 }
 basic_json_parser_4:
                 ++m_cursor;
 basic_json_parser_5:
                 {
-                    return token_type::parse_error;
+                    return last_token_type = token_type::parse_error;
                 }
 basic_json_parser_6:
                 ++m_cursor;
@@ -7725,7 +7727,7 @@ basic_json_parser_9:
 basic_json_parser_10:
                 ++m_cursor;
                 {
-                    return token_type::value_separator;
+                    return last_token_type = token_type::value_separator;
                 }
 basic_json_parser_12:
                 yych = *++m_cursor;
@@ -7765,7 +7767,7 @@ basic_json_parser_13:
                 }
 basic_json_parser_14:
                 {
-                    return token_type::value_number;
+                    return last_token_type = token_type::value_number;
                 }
 basic_json_parser_15:
                 yyaccept = 1;
@@ -7802,17 +7804,17 @@ basic_json_parser_15:
 basic_json_parser_17:
                 ++m_cursor;
                 {
-                    return token_type::name_separator;
+                    return last_token_type = token_type::name_separator;
                 }
 basic_json_parser_19:
                 ++m_cursor;
                 {
-                    return token_type::begin_array;
+                    return last_token_type = token_type::begin_array;
                 }
 basic_json_parser_21:
                 ++m_cursor;
                 {
-                    return token_type::end_array;
+                    return last_token_type = token_type::end_array;
                 }
 basic_json_parser_23:
                 yyaccept = 0;
@@ -7841,12 +7843,12 @@ basic_json_parser_25:
 basic_json_parser_26:
                 ++m_cursor;
                 {
-                    return token_type::begin_object;
+                    return last_token_type = token_type::begin_object;
                 }
 basic_json_parser_28:
                 ++m_cursor;
                 {
-                    return token_type::end_object;
+                    return last_token_type = token_type::end_object;
                 }
 basic_json_parser_30:
                 yyaccept = 0;
@@ -7890,7 +7892,7 @@ basic_json_parser_33:
 basic_json_parser_34:
                 ++m_cursor;
                 {
-                    return token_type::value_string;
+                    return last_token_type = token_type::value_string;
                 }
 basic_json_parser_36:
                 ++m_cursor;
@@ -8200,12 +8202,12 @@ basic_json_parser_55:
 basic_json_parser_56:
                 ++m_cursor;
                 {
-                    return token_type::literal_null;
+                    return last_token_type = token_type::literal_null;
                 }
 basic_json_parser_58:
                 ++m_cursor;
                 {
-                    return token_type::literal_true;
+                    return last_token_type = token_type::literal_true;
                 }
 basic_json_parser_60:
                 ++m_cursor;
@@ -8245,7 +8247,7 @@ basic_json_parser_60:
 basic_json_parser_61:
                 ++m_cursor;
                 {
-                    return token_type::literal_false;
+                    return last_token_type = token_type::literal_false;
                 }
 basic_json_parser_63:
                 ++m_cursor;
@@ -8289,7 +8291,8 @@ basic_json_parser_63:
         /// append data from the stream to the internal buffer
         void yyfill() noexcept
         {
-            if (m_stream == nullptr or not * m_stream)
+            // yyfill has no effect if we do not have a ready stream
+            if (m_stream == nullptr or m_stream->fail())
             {
                 return;
             }
@@ -8305,26 +8308,47 @@ basic_json_parser_63:
 
             // delete previous buffer
             m_buffer.erase(0, last_buffer_size);
+
+            // read line from stream to buffer
             std::string line;
             assert(m_stream != nullptr);
             std::getline(*m_stream, line);
             m_buffer += "\n" + line; // add line with newline symbol
 
+            // set the pointers accordingly
             m_content = reinterpret_cast<const lexer_char_t*>(m_buffer.c_str());
             assert(m_content != nullptr);
-            m_buffer_start = m_start  = m_content;
+            m_buffer_start = m_start = m_content;
             m_marker = m_start + offset_marker;
             m_cursor = m_start + offset_cursor;
             m_limit  = m_start + m_buffer.size() - 1;
         }
 
-        /// return the position (bytes) of the end of the last token
-        size_t last_token_pos() const noexcept
+        /// return the location of the end of the last token
+        size_t last_token_location() const noexcept
         {
             // m_buffer_start points to the first byte of the current buffer
             // m_cursor points to the byte behind the current token
             // m_previous_buffer_sizes contains the size the previous buffers
             return static_cast<size_t>(m_cursor - m_buffer_start) + m_previous_buffer_sizes;
+        }
+
+        /// returns an error message for parse errors
+        std::string error_message() const
+        {
+            const std::string last_token(reinterpret_cast<typename std::string::const_pointer>(m_start),
+                                         static_cast<size_t>(m_cursor - m_start));
+            std::string result = "parse error: unexpected ";
+            if (last_token_type == token_type::end_of_input)
+            {
+                result += token_type_name(token_type::end_of_input);
+            }
+            else
+            {
+                result += "'" + last_token + "'";
+            }
+            result += " at byte " + std::to_string(last_token_location() - last_token.size() + 1);
+            return result;
         }
 
         /// return string representation of last read token
@@ -8356,8 +8380,8 @@ basic_json_parser_63:
         @return string value of current token without opening and closing
         quotes
 
-        @throw parse_error (209,210) if to_unicode fails
-        @throw parse_error (211) if low surrogate is missing
+        @throw parse_error (202,203) if to_unicode fails
+        @throw parse_error (204) if low surrogate is missing
         */
         string_t get_string() const
         {
@@ -8430,7 +8454,8 @@ basic_json_parser_63:
                                 // make sure there is a subsequent unicode
                                 if ((i + 6 >= m_limit) or * (i + 5) != '\\' or * (i + 6) != 'u')
                                 {
-                                    throw parse_error(211, "missing low surrogate");
+                                    std::string error_msg = error_message() + "; missing low surrogate";
+                                    throw parse_error(204, error_msg);
                                 }
 
                                 // get code yyyy from uxxxx\uyyyy
@@ -8652,6 +8677,8 @@ basic_json_parser_63:
         const lexer_char_t* m_buffer_start = nullptr;
         /// the size of the last buffer (before yyfill was called)
         size_t m_previous_buffer_sizes = 0;
+        /// the last token type
+        token_type last_token_type = token_type::end_of_input;
     };
 
     /*!
@@ -8683,7 +8710,7 @@ basic_json_parser_63:
         {
             basic_json result = parse_internal(true);
 
-            expect(lexer::token_type::end_of_input, 201);
+            expect(lexer::token_type::end_of_input);
 
             // return parser result and replace it with null in case the
             // top-level value was discarded by the callback function
@@ -8722,7 +8749,7 @@ basic_json_parser_63:
                     }
 
                     // no comma is expected here
-                    unexpect(lexer::token_type::value_separator, 202);
+                    unexpect(lexer::token_type::value_separator);
 
                     // otherwise: parse key-value pairs
                     do
@@ -8734,7 +8761,7 @@ basic_json_parser_63:
                         }
 
                         // store key
-                        expect(lexer::token_type::value_string, 203);
+                        expect(lexer::token_type::value_string);
                         const auto key = m_lexer.get_string();
 
                         bool keep_tag = false;
@@ -8753,7 +8780,7 @@ basic_json_parser_63:
 
                         // parse separator (:)
                         get_token();
-                        expect(lexer::token_type::name_separator, 204);
+                        expect(lexer::token_type::name_separator);
 
                         // parse and add value
                         get_token();
@@ -8766,7 +8793,7 @@ basic_json_parser_63:
                     while (last_token == lexer::token_type::value_separator);
 
                     // closing }
-                    expect(lexer::token_type::end_object, 205);
+                    expect(lexer::token_type::end_object);
                     get_token();
                     if (keep and callback and not callback(--depth, parse_event_t::object_end, result))
                     {
@@ -8800,7 +8827,7 @@ basic_json_parser_63:
                     }
 
                     // no comma is expected here
-                    unexpect(lexer::token_type::value_separator, 206);
+                    unexpect(lexer::token_type::value_separator);
 
                     // otherwise: parse values
                     do
@@ -8821,7 +8848,7 @@ basic_json_parser_63:
                     while (last_token == lexer::token_type::value_separator);
 
                     // closing ]
-                    expect(lexer::token_type::end_array, 207);
+                    expect(lexer::token_type::end_array);
                     get_token();
                     if (keep and callback and not callback(--depth, parse_event_t::array_end, result))
                     {
@@ -8872,7 +8899,7 @@ basic_json_parser_63:
                 default:
                 {
                     // the last token was unexpected
-                    unexpect(last_token, 208);
+                    unexpect(last_token);
                 }
             }
 
@@ -8890,28 +8917,23 @@ basic_json_parser_63:
             return last_token;
         }
 
-        void expect(typename lexer::token_type t, int error_code) const
+        void expect(typename lexer::token_type t) const
         {
             if (t != last_token)
             {
-                std::string error_msg = "parse error - unexpected ";
-                error_msg += (last_token == lexer::token_type::parse_error ? ("'" +  m_lexer.get_token_string() +
-                              "'") :
-                              lexer::token_type_name(last_token));
+                std::string error_msg = m_lexer.error_message();
                 error_msg += "; expected " + lexer::token_type_name(t);
-                throw parse_error(error_code, error_msg);
+                throw parse_error(201, error_msg);
             }
         }
 
-        void unexpect(typename lexer::token_type t, int error_code) const
+        void unexpect(typename lexer::token_type t) const
         {
             if (t == last_token)
             {
-                std::string error_msg = "parse error - unexpected ";
-                error_msg += (last_token == lexer::token_type::parse_error ? ("'" +  m_lexer.get_token_string() +
-                              "'") :
-                              lexer::token_type_name(last_token));
-                throw parse_error(error_code, error_msg);
+                std::string error_msg = m_lexer.error_message();
+                error_msg += "; expected JSON value";
+                throw parse_error(201, error_msg);
             }
         }
 

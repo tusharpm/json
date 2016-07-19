@@ -9798,10 +9798,11 @@ TEST_CASE("lexer class")
 
     SECTION("to_unicode")
     {
-        CHECK(json::lexer::to_unicode(0x1F4A9) == "💩");
-        CHECK_THROWS_AS(json::lexer::to_unicode(0x200000), json::parse_error);
-        CHECK_THROWS_WITH(json::lexer::to_unicode(0x200000),
-                          "[except.210] code points above 0x10FFFF are invalid");
+        json::lexer l("");
+        CHECK(l.to_unicode(0x1F4A9) == "💩");
+        CHECK_THROWS_AS(l.to_unicode(0x200000), json::parse_error);
+        CHECK_THROWS_WITH(l.to_unicode(0x200000),
+                          "[except.203] parse error: unexpected end of input at byte 1; code points above 0x10FFFF are invalid");
     }
 }
 
@@ -9861,15 +9862,19 @@ TEST_CASE("parser class")
             {
                 // error: tab in string
                 CHECK_THROWS_AS(json::parser("\"\t\"").parse(), json::parse_error);
-                CHECK_THROWS_WITH(json::parser("\"\t\"").parse(), "[except.208] parse error - unexpected '\"'");
+                CHECK_THROWS_WITH(json::parser("\"\t\"").parse(),
+                                  "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
                 // error: newline in string
                 CHECK_THROWS_AS(json::parser("\"\n\"").parse(), json::parse_error);
                 CHECK_THROWS_AS(json::parser("\"\r\"").parse(), json::parse_error);
-                CHECK_THROWS_WITH(json::parser("\"\n\"").parse(), "[except.208] parse error - unexpected '\"'");
-                CHECK_THROWS_WITH(json::parser("\"\r\"").parse(), "[except.208] parse error - unexpected '\"'");
+                CHECK_THROWS_WITH(json::parser("\"\n\"").parse(),
+                                  "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
+                CHECK_THROWS_WITH(json::parser("\"\r\"").parse(),
+                                  "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
                 // error: backspace in string
                 CHECK_THROWS_AS(json::parser("\"\b\"").parse(), json::parse_error);
-                CHECK_THROWS_WITH(json::parser("\"\b\"").parse(), "[except.208] parse error - unexpected '\"'");
+                CHECK_THROWS_WITH(json::parser("\"\b\"").parse(),
+                                  "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
                 // improve code coverage
                 CHECK_THROWS_AS(json::parser("\uFF01").parse(), json::parse_error);
             }
@@ -10031,37 +10036,37 @@ TEST_CASE("parser class")
                 CHECK_THROWS_AS(json::parser("+0").parse(), json::parse_error);
 
                 CHECK_THROWS_WITH(json::parser("01").parse(),
-                                  "[except.201] parse error - unexpected number literal; expected end of input");
+                                  "[except.201] parse error: unexpected '1' at byte 2; expected end of input");
                 CHECK_THROWS_WITH(json::parser("--1").parse(),
-                                  "[except.208] parse error - unexpected '-'");
+                                  "[except.201] parse error: unexpected '-' at byte 1; expected JSON value");
                 CHECK_THROWS_WITH(json::parser("1.").parse(),
-                                  "[except.201] parse error - unexpected '.'; expected end of input");
+                                  "[except.201] parse error: unexpected '.' at byte 2; expected end of input");
                 CHECK_THROWS_WITH(json::parser("1E").parse(),
-                                  "[except.201] parse error - unexpected 'E'; expected end of input");
+                                  "[except.201] parse error: unexpected 'E' at byte 2; expected end of input");
                 CHECK_THROWS_WITH(json::parser("1E-").parse(),
-                                  "[except.201] parse error - unexpected 'E'; expected end of input");
+                                  "[except.201] parse error: unexpected 'E' at byte 2; expected end of input");
                 CHECK_THROWS_WITH(json::parser("1.E1").parse(),
-                                  "[except.201] parse error - unexpected '.'; expected end of input");
+                                  "[except.201] parse error: unexpected '.' at byte 2; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-1E").parse(),
-                                  "[except.201] parse error - unexpected 'E'; expected end of input");
+                                  "[except.201] parse error: unexpected 'E' at byte 3; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0E#").parse(),
-                                  "[except.201] parse error - unexpected 'E'; expected end of input");
+                                  "[except.201] parse error: unexpected 'E' at byte 3; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0E-#").parse(),
-                                  "[except.201] parse error - unexpected 'E'; expected end of input");
+                                  "[except.201] parse error: unexpected 'E' at byte 3; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0#").parse(),
-                                  "[except.201] parse error - unexpected '#'; expected end of input");
+                                  "[except.201] parse error: unexpected '#' at byte 3; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0.0:").parse(),
-                                  "[except.201] parse error - unexpected ':'; expected end of input");
+                                  "[except.201] parse error: unexpected ':' at byte 5; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0.0Z").parse(),
-                                  "[except.201] parse error - unexpected 'Z'; expected end of input");
+                                  "[except.201] parse error: unexpected 'Z' at byte 5; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0E123:").parse(),
-                                  "[except.201] parse error - unexpected ':'; expected end of input");
+                                  "[except.201] parse error: unexpected ':' at byte 7; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0e0-:").parse(),
-                                  "[except.201] parse error - unexpected '-'; expected end of input");
+                                  "[except.201] parse error: unexpected '-' at byte 5; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0e-:").parse(),
-                                  "[except.201] parse error - unexpected 'e'; expected end of input");
+                                  "[except.201] parse error: unexpected 'e' at byte 3; expected end of input");
                 CHECK_THROWS_WITH(json::parser("-0f").parse(),
-                                  "[except.201] parse error - unexpected 'f'; expected end of input");
+                                  "[except.201] parse error: unexpected 'f' at byte 3; expected end of input");
             }
         }
     }
@@ -10084,55 +10089,55 @@ TEST_CASE("parser class")
         CHECK_THROWS_AS(json::parser("1E/").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("1E:").parse(), json::parse_error);
         CHECK_THROWS_WITH(json::parser("0.").parse(),
-                          "[except.201] parse error - unexpected '.'; expected end of input");
+                          "[except.201] parse error: unexpected '.' at byte 2; expected end of input");
         CHECK_THROWS_WITH(json::parser("-").parse(),
-                          "[except.208] parse error - unexpected '-'");
+                          "[except.201] parse error: unexpected '-' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("--").parse(),
-                          "[except.208] parse error - unexpected '-'");
+                          "[except.201] parse error: unexpected '-' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("-0.").parse(),
-                          "[except.201] parse error - unexpected '.'; expected end of input");
+                          "[except.201] parse error: unexpected '.' at byte 3; expected end of input");
         CHECK_THROWS_WITH(json::parser("-.").parse(),
-                          "[except.208] parse error - unexpected '-'");
+                          "[except.201] parse error: unexpected '-' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("-:").parse(),
-                          "[except.208] parse error - unexpected '-'");
+                          "[except.201] parse error: unexpected '-' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("0.:").parse(),
-                          "[except.201] parse error - unexpected '.'; expected end of input");
+                          "[except.201] parse error: unexpected '.' at byte 2; expected end of input");
         CHECK_THROWS_WITH(json::parser("e.").parse(),
-                          "[except.208] parse error - unexpected 'e'");
+                          "[except.201] parse error: unexpected 'e' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("1e.").parse(),
-                          "[except.201] parse error - unexpected 'e'; expected end of input");
+                          "[except.201] parse error: unexpected 'e' at byte 2; expected end of input");
         CHECK_THROWS_WITH(json::parser("1e/").parse(),
-                          "[except.201] parse error - unexpected 'e'; expected end of input");
+                          "[except.201] parse error: unexpected 'e' at byte 2; expected end of input");
         CHECK_THROWS_WITH(json::parser("1e:").parse(),
-                          "[except.201] parse error - unexpected 'e'; expected end of input");
+                          "[except.201] parse error: unexpected 'e' at byte 2; expected end of input");
         CHECK_THROWS_WITH(json::parser("1E.").parse(),
-                          "[except.201] parse error - unexpected 'E'; expected end of input");
+                          "[except.201] parse error: unexpected 'E' at byte 2; expected end of input");
         CHECK_THROWS_WITH(json::parser("1E/").parse(),
-                          "[except.201] parse error - unexpected 'E'; expected end of input");
+                          "[except.201] parse error: unexpected 'E' at byte 2; expected end of input");
         CHECK_THROWS_WITH(json::parser("1E:").parse(),
-                          "[except.201] parse error - unexpected 'E'; expected end of input");
+                          "[except.201] parse error: unexpected 'E' at byte 2; expected end of input");
 
         // unexpected end of null
         CHECK_THROWS_AS(json::parser("n").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("nu").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("nul").parse(), json::parse_error);
         CHECK_THROWS_WITH(json::parser("n").parse(),
-                          "[except.208] parse error - unexpected 'n'");
+                          "[except.201] parse error: unexpected 'n' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("nu").parse(),
-                          "[except.208] parse error - unexpected 'n'");
+                          "[except.201] parse error: unexpected 'n' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("nul").parse(),
-                          "[except.208] parse error - unexpected 'n'");
+                          "[except.201] parse error: unexpected 'n' at byte 1; expected JSON value");
 
         // unexpected end of true
         CHECK_THROWS_AS(json::parser("t").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("tr").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("tru").parse(), json::parse_error);
         CHECK_THROWS_WITH(json::parser("t").parse(),
-                          "[except.208] parse error - unexpected 't'");
+                          "[except.201] parse error: unexpected 't' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("tr").parse(),
-                          "[except.208] parse error - unexpected 't'");
+                          "[except.201] parse error: unexpected 't' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("tru").parse(),
-                          "[except.208] parse error - unexpected 't'");
+                          "[except.201] parse error: unexpected 't' at byte 1; expected JSON value");
 
         // unexpected end of false
         CHECK_THROWS_AS(json::parser("f").parse(), json::parse_error);
@@ -10140,13 +10145,13 @@ TEST_CASE("parser class")
         CHECK_THROWS_AS(json::parser("fal").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("fals").parse(), json::parse_error);
         CHECK_THROWS_WITH(json::parser("f").parse(),
-                          "[except.208] parse error - unexpected 'f'");
+                          "[except.201] parse error: unexpected 'f' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("fa").parse(),
-                          "[except.208] parse error - unexpected 'f'");
+                          "[except.201] parse error: unexpected 'f' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("fal").parse(),
-                          "[except.208] parse error - unexpected 'f'");
+                          "[except.201] parse error: unexpected 'f' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("fals").parse(),
-                          "[except.208] parse error - unexpected 'f'");
+                          "[except.201] parse error: unexpected 'f' at byte 1; expected JSON value");
 
         // missing/unexpected end of array
         CHECK_THROWS_AS(json::parser("[").parse(), json::parse_error);
@@ -10156,17 +10161,17 @@ TEST_CASE("parser class")
         CHECK_THROWS_AS(json::parser("[1,]").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("]").parse(), json::parse_error);
         CHECK_THROWS_WITH(json::parser("[").parse(),
-                          "[except.208] parse error - unexpected end of input");
+                          "[except.201] parse error: unexpected end of input at byte 2; expected JSON value");
         CHECK_THROWS_WITH(json::parser("[,").parse(),
-                          "[except.206] parse error - unexpected ','");
+                          "[except.201] parse error: unexpected ',' at byte 2; expected JSON value");
         CHECK_THROWS_WITH(json::parser("[1").parse(),
-                          "[except.207] parse error - unexpected end of input; expected ']'");
+                          "[except.201] parse error: unexpected end of input at byte 3; expected ']'");
         CHECK_THROWS_WITH(json::parser("[1,").parse(),
-                          "[except.208] parse error - unexpected end of input");
+                          "[except.201] parse error: unexpected end of input at byte 4; expected JSON value");
         CHECK_THROWS_WITH(json::parser("[1,]").parse(),
-                          "[except.208] parse error - unexpected ']'");
+                          "[except.201] parse error: unexpected ']' at byte 4; expected JSON value");
         CHECK_THROWS_WITH(json::parser("]").parse(),
-                          "[except.208] parse error - unexpected ']'");
+                          "[except.201] parse error: unexpected ']' at byte 1; expected JSON value");
 
         // missing/unexpected end of object
         CHECK_THROWS_AS(json::parser("{").parse(), json::parse_error);
@@ -10178,21 +10183,21 @@ TEST_CASE("parser class")
         CHECK_THROWS_AS(json::parser("{\"foo\":1,}").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("}").parse(), json::parse_error);
         CHECK_THROWS_WITH(json::parser("{").parse(),
-                          "[except.203] parse error - unexpected end of input; expected string literal");
+                          "[except.201] parse error: unexpected end of input at byte 2; expected string literal");
         CHECK_THROWS_WITH(json::parser("{,").parse(),
-                          "[except.202] parse error - unexpected ','");
+                          "[except.201] parse error: unexpected ',' at byte 2; expected JSON value");
         CHECK_THROWS_WITH(json::parser("{\"foo\"").parse(),
-                          "[except.204] parse error - unexpected end of input; expected ':'");
+                          "[except.201] parse error: unexpected end of input at byte 7; expected ':'");
         CHECK_THROWS_WITH(json::parser("{\"foo\":").parse(),
-                          "[except.208] parse error - unexpected end of input");
+                          "[except.201] parse error: unexpected end of input at byte 8; expected JSON value");
         CHECK_THROWS_WITH(json::parser("{\"foo\":}").parse(),
-                          "[except.208] parse error - unexpected '}'");
+                          "[except.201] parse error: unexpected '}' at byte 8; expected JSON value");
         CHECK_THROWS_WITH(json::parser("{\"foo\":1").parse(),
-                          "[except.205] parse error - unexpected end of input; expected '}'");
+                          "[except.201] parse error: unexpected end of input at byte 9; expected '}'");
         CHECK_THROWS_WITH(json::parser("{\"foo\":1,}").parse(),
-                          "[except.203] parse error - unexpected '}'; expected string literal");
+                          "[except.201] parse error: unexpected '}' at byte 10; expected string literal");
         CHECK_THROWS_WITH(json::parser("}").parse(),
-                          "[except.208] parse error - unexpected '}'");
+                          "[except.201] parse error: unexpected '}' at byte 1; expected JSON value");
 
         // missing/unexpected end of string
         CHECK_THROWS_AS(json::parser("\"").parse(), json::parse_error);
@@ -10202,17 +10207,17 @@ TEST_CASE("parser class")
         CHECK_THROWS_AS(json::parser("\"\\u01\"").parse(), json::parse_error);
         CHECK_THROWS_AS(json::parser("\"\\u012\"").parse(), json::parse_error);
         CHECK_THROWS_WITH(json::parser("\"").parse(),
-                          "[except.208] parse error - unexpected '\"'");
+                          "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("\"\\\"").parse(),
-                          "[except.208] parse error - unexpected '\"'");
+                          "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("\"\\u\"").parse(),
-                          "[except.208] parse error - unexpected '\"'");
+                          "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("\"\\u0\"").parse(),
-                          "[except.208] parse error - unexpected '\"'");
+                          "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("\"\\u01\"").parse(),
-                          "[except.208] parse error - unexpected '\"'");
+                          "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
         CHECK_THROWS_WITH(json::parser("\"\\u012\"").parse(),
-                          "[except.208] parse error - unexpected '\"'");
+                          "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
 
         // invalid escapes
         for (int c = 1; c < 128; ++c)
@@ -10245,7 +10250,8 @@ TEST_CASE("parser class")
                 default:
                 {
                     CHECK_THROWS_AS(json::parser(s).parse(), json::parse_error);
-                    CHECK_THROWS_WITH(json::parser(s).parse(), "[except.208] parse error - unexpected '\"'");
+                    CHECK_THROWS_WITH(json::parser(s).parse(),
+                                      "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
                     break;
                 }
             }
@@ -10315,10 +10321,14 @@ TEST_CASE("parser class")
                     CHECK_THROWS_AS(json::parser(s3).parse(), json::parse_error);
                     CHECK_THROWS_AS(json::parser(s4).parse(), json::parse_error);
 
-                    CHECK_THROWS_WITH(json::parser(s1).parse(), "[except.208] parse error - unexpected '\"'");
-                    CHECK_THROWS_WITH(json::parser(s2).parse(), "[except.208] parse error - unexpected '\"'");
-                    CHECK_THROWS_WITH(json::parser(s3).parse(), "[except.208] parse error - unexpected '\"'");
-                    CHECK_THROWS_WITH(json::parser(s4).parse(), "[except.208] parse error - unexpected '\"'");
+                    CHECK_THROWS_WITH(json::parser(s1).parse(),
+                                      "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
+                    CHECK_THROWS_WITH(json::parser(s2).parse(),
+                                      "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
+                    CHECK_THROWS_WITH(json::parser(s3).parse(),
+                                      "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
+                    CHECK_THROWS_WITH(json::parser(s4).parse(),
+                                      "[except.201] parse error: unexpected '\"' at byte 1; expected JSON value");
                 }
             }
         }
@@ -10326,17 +10336,17 @@ TEST_CASE("parser class")
         // missing part of a surrogate pair
         CHECK_THROWS_AS(json::parse("\"\\uD80C\""), json::parse_error);
         CHECK_THROWS_WITH(json::parse("\"\\uD80C\""),
-                          "[except.211] missing low surrogate");
+                          "[except.204] parse error: unexpected '\"\\uD80C\"' at byte 1; missing low surrogate");
         // invalid surrogate pair
         CHECK_THROWS_AS(json::parse("\"\\uD80C\\uD80C\""), json::parse_error);
         CHECK_THROWS_AS(json::parse("\"\\uD80C\\u0000\""), json::parse_error);
         CHECK_THROWS_AS(json::parse("\"\\uD80C\\uFFFF\""), json::parse_error);
         CHECK_THROWS_WITH(json::parse("\"\\uD80C\\uD80C\""),
-                          "[except.209] missing or wrong low surrogate");
+                          "[except.202] parse error: unexpected '\"\\uD80C\\uD80C\"' at byte 1; missing or wrong low surrogate");
         CHECK_THROWS_WITH(json::parse("\"\\uD80C\\u0000\""),
-                          "[except.209] missing or wrong low surrogate");
+                          "[except.202] parse error: unexpected '\"\\uD80C\\u0000\"' at byte 1; missing or wrong low surrogate");
         CHECK_THROWS_WITH(json::parse("\"\\uD80C\\uFFFF\""),
-                          "[except.209] missing or wrong low surrogate");
+                          "[except.202] parse error: unexpected '\"\\uD80C\\uFFFF\"' at byte 1; missing or wrong low surrogate");
     }
 
     SECTION("callback function")
