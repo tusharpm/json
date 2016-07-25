@@ -811,7 +811,19 @@ class basic_json
     This enumeration collects the different JSON types. It is internally used
     to distinguish the stored values, and the functions @ref is_null(), @ref
     is_object(), @ref is_array(), @ref is_string(), @ref is_boolean(), @ref
-    is_number(), and @ref is_discarded() rely on it.
+    is_number() (with @ref is_number_integer(), @ref is_number_unsigned(), and
+    @ref is_number_float()), @ref is_discarded(), @ref is_primitive(), and
+    @ref is_structured() rely on it.
+
+    @note There are three enumeration entries (number_integer,
+    number_unsigned, and number_float), because the library distinguishes
+    these three types for numbers: @ref number_unsigned_t is used for unsigned
+    integers, @ref number_integer_t is used for signed integers, and @ref
+    number_float_t is used for floating-point numbers or to approximate
+    integers which do not fit in the limits of their respective type.
+
+    @sa @ref basic_json(const value_t value_type) -- create a JSON value with
+    the default value for a given type
 
     @since version 1.0.0
     */
@@ -822,7 +834,7 @@ class basic_json
         array,           ///< array (ordered collection of values)
         string,          ///< string value
         boolean,         ///< boolean value
-        number_integer,  ///< number value (integer)
+        number_integer,  ///< number value (signed integer)
         number_unsigned, ///< number value (unsigned integer)
         number_float,    ///< number value (floating-point)
         discarded        ///< discarded by the the parser callback function
@@ -852,7 +864,24 @@ class basic_json
     /*!
     @brief a JSON value
 
-    The actual storage for a JSON value of the @ref basic_json class.
+    The actual storage for a JSON value of the @ref basic_json class. This
+    union combines the different storage types for the JSON value types
+    defined in @ref value_t.
+
+    JSON type | value_t type    | used type
+    --------- | --------------- | ------------------------
+    object    | object          | pointer to @ref object_t
+    array     | array           | pointer to @ref array_t
+    string    | string          | pointer to @ref string_t
+    boolean   | boolean         | @ref boolean_t
+    number    | number_integer  | @ref number_integer_t
+    number    | number_unsigned | @ref number_unsigned_t
+    number    | number_float    | @ref number_float_t
+    null      | null            | *no value is stored*
+
+    @note Variable-length types (objects, arrays, and strings) are stored as
+    pointers. The size of the union should not exceed 64 bits if the default
+    value types are used.
 
     @since version 1.0.0
     */
@@ -968,6 +997,8 @@ class basic_json
     This enumeration lists the parser events that can trigger calling a
     callback function of type @ref parser_callback_t during parsing.
 
+    @image html callback_events.png "Example when certain parse events are triggered"
+
     @since version 1.0.0
     */
     enum class parse_event_t : uint8_t
@@ -1010,6 +1041,8 @@ class basic_json
     parse_event_t::array_end | the parser read `]` and finished processing a JSON array | depth of the parent of the JSON array | the parsed JSON array
     parse_event_t::value | the parser finished reading a JSON value | depth of the value | the parsed JSON value
 
+    @image html callback_events.png "Example when certain parse events are triggered"
+
     Discarding a value (i.e., returning `false`) has different effects
     depending on the context in which function was called:
 
@@ -1035,7 +1068,9 @@ class basic_json
 
     @since version 1.0.0
     */
-    using parser_callback_t = std::function<bool(int depth, parse_event_t event, basic_json& parsed)>;
+    using parser_callback_t = std::function<bool(int depth,
+                              parse_event_t event,
+                              basic_json& parsed)>;
 
 
     //////////////////
@@ -2900,8 +2935,10 @@ class basic_json
     template<typename ReferenceType, typename ThisType>
     static ReferenceType get_ref_impl(ThisType& obj)
     {
-        // delegate the call to get_ptr<>()
+        // helper type
         using PointerType = typename std::add_pointer<ReferenceType>::type;
+
+        // delegate the call to get_ptr<>()
         auto ptr = obj.template get_ptr<PointerType>();
 
         if (ptr != nullptr)
@@ -3723,8 +3760,8 @@ class basic_json
     /*!
     @brief access specified object element with default value
 
-    Returns either a copy of an object's element at the specified key @a key or
-    a given default value if no element with key @a key exists.
+    Returns either a copy of an object's element at the specified key @a key
+    or a given default value if no element with key @a key exists.
 
     The function is basically equivalent to executing
     @code {.cpp}
@@ -3796,11 +3833,86 @@ class basic_json
 
     /*!
     @brief overload for a default value of type const char*
-    @copydoc basic_json::value()
+    @copydoc basic_json::value(const typename object_t::key_type&, ValueType)
     */
     string_t value(const typename object_t::key_type& key, const char* default_value) const
     {
         return value(key, string_t(default_value));
+    }
+
+    /*!
+    @brief access specified object element via JSON Pointer with default value
+
+    Returns either a copy of an object's element at the specified key @a key
+    or a given default value if no element with key @a key exists.
+
+    The function is basically equivalent to executing
+    @code {.cpp}
+    try {
+        return at(ptr);
+    } catch(std::out_of_range) {
+        return default_value;
+    }
+    @endcode
+
+    @note Unlike @ref at(const json_pointer&), this function does not throw
+    if the given key @a key was not found.
+
+    @param[in] ptr  a JSON pointer to the element to access
+    @param[in] default_value  the value to return if @a ptr found no value
+
+    @tparam ValueType type compatible to JSON values, for instance `int` for
+    JSON integer numbers, `bool` for JSON booleans, or `std::vector` types for
+    JSON arrays. Note the type of the expected value at @a key and the default
+    value @a default_value must be compatible.
+
+    @return copy of the element at key @a key or @a default_value if @a key
+    is not found
+
+    @throw type_error (305) if JSON is not an object; example: `"cannot use
+    value() with null"`
+
+    @complexity Logarithmic in the size of the container.
+
+    @liveexample{The example below shows how object elements can be queried
+    with a default value.,basic_json__value_ptr}
+
+    @sa @ref operator[](const json_ptr&) for unchecked access by reference
+
+    @since version 2.0.2
+    */
+    template <class ValueType, typename
+              std::enable_if<
+                  std::is_convertible<basic_json_t, ValueType>::value
+                  , int>::type = 0>
+    ValueType value(const json_pointer& ptr, ValueType default_value) const
+    {
+        // at only works for objects
+        if (is_object())
+        {
+            // if pointer resolves a value, return it or use default value
+            try
+            {
+                return ptr.get_checked(this);
+            }
+            catch (std::out_of_range&)
+            {
+                return default_value;
+            }
+        }
+        else
+        {
+            throw type_error(305, "cannot use value() with " + type_name());
+        }
+    }
+
+    /*!
+    @brief overload for a default value of type const char*
+    @copydoc basic_json::value(const json_pointer&, ValueType)
+    */
+    string_t value(const json_pointer& ptr, const char* default_value) const
+    {
+        return value(ptr, string_t(default_value));
     }
 
     /*!
@@ -7379,7 +7491,7 @@ class basic_json
         explicit lexer(const string_t& s) noexcept
             : m_stream(nullptr), m_buffer(s)
         {
-            m_content = reinterpret_cast<const lexer_char_t*>(s.c_str());
+            m_content = reinterpret_cast<const lexer_char_t*>(m_buffer.c_str());
             assert(m_content != nullptr);
             m_buffer_start = m_start = m_cursor = m_content;
             m_limit = m_content + s.size();
@@ -7405,24 +7517,32 @@ class basic_json
         lexer operator=(const lexer&) = delete;
 
         /*!
-        @brief create a string from a Unicode code point
+        @brief create a string from one or two Unicode code points
+
+        There are two cases: (1) @a codepoint1 is in the Basic Multilingual
+        Plane (U+0000 through U+FFFF) and @a codepoint2 is 0, or (2)
+        @a codepoint1 and @a codepoint2 are a UTF-16 surrogate pair to
+        represent a code point above U+FFFF.
 
         @param[in] codepoint1  the code point (can be high surrogate)
         @param[in] codepoint2  the code point (can be low surrogate or 0)
 
-        @return string representation of the code point
+        @return string representation of the code point; the length of the
+        result string is between 1 and 4 characters.
 
         @throw parse_error (203) if code point is > 0x10ffff; example: `"code
         points above 0x10FFFF are invalid"`
         @throw parse_error (202) if the low surrogate is invalid; example:
         `"missing or wrong low surrogate"`
 
+        @complexity Constant.
+
         @see <http://en.wikipedia.org/wiki/UTF-8#Sample_code>
         */
         string_t to_unicode(const std::size_t codepoint1,
                             const std::size_t codepoint2 = 0) const
         {
-            // calculate the codepoint from the given code points
+            // calculate the code point from the given code points
             std::size_t codepoint = codepoint1;
 
             // check if codepoint1 is a high surrogate
@@ -7535,6 +7655,17 @@ class basic_json
         function consists of a large block of code with `goto` jumps.
 
         @return the class of the next token read from the buffer
+
+        @complexity Linear in the length of the input.\n
+
+        Proposition: The loop below will always terminate for finite input.\n
+
+        Proof (by contradiction): Assume a finite input. To loop forever, the
+        loop must never hit code with a `break` statement. The only code
+        snippets without a `break` statement are the continue statements for
+        whitespace and byte-order-marks. To loop forever, the input must be an
+        infinite sequence of whitespace or byte-order-marks. This contradicts
+        the assumption of finite input, q.e.d.
         */
         token_type scan() noexcept
         {
@@ -7555,8 +7686,8 @@ class basic_json
                     {
                         0,   0,   0,   0,   0,   0,   0,   0,
                         0,  32,  32,   0,   0,  32,   0,   0,
-                        128, 128, 128, 128, 128, 128, 128, 128,
-                        128, 128, 128, 128, 128, 128, 128, 128,
+                        0,   0,   0,   0,   0,   0,   0,   0,
+                        0,   0,   0,   0,   0,   0,   0,   0,
                         160, 128,   0, 128, 128, 128, 128, 128,
                         128, 128, 128, 128, 128, 128, 128, 128,
                         192, 192, 192, 192, 192, 192, 192, 192,
@@ -7735,7 +7866,7 @@ basic_json_parser_6:
 basic_json_parser_9:
                     yyaccept = 0;
                     yych = *(m_marker = ++m_cursor);
-                    if (yych <= 0x0F)
+                    if (yych <= 0x1F)
                     {
                         goto basic_json_parser_5;
                     }
@@ -7893,7 +8024,7 @@ basic_json_parser_32:
                     {
                         goto basic_json_parser_31;
                     }
-                    if (yych <= 0x0F)
+                    if (yych <= 0x1F)
                     {
                         goto basic_json_parser_33;
                     }
@@ -8403,9 +8534,44 @@ basic_json_parser_63:
            according to the nature of the escape. Some escapes create new
            characters (e.g., `"\\n"` is replaced by `"\n"`), some are copied
            as is (e.g., `"\\\\"`). Furthermore, Unicode escapes of the shape
-           `"\\uxxxx"` need special care. In this case, to_unicode takes care
-           of the construction of the values.
+           `"\\uxxxx"` need special care. In this case, @ref to_unicode takes
+           care of the construction of the values.
         2. Unescaped characters are copied as is.
+
+        @pre `m_cursor - m_start >= 2`, meaning the length of the last token
+        is at least 2 bytes which is trivially true for any string (which
+        consists of at least two quotes).
+
+            " c1 c2 c3 ... "
+            ^                ^
+            m_start          m_cursor
+
+        @complexity Linear in the length of the string.\n
+
+        Lemma: The loop body will always terminate.\n
+
+        Proof (by contradiction): Assume the loop body does not terminate. As
+        the loop body does not contain another loop, one of the called
+        functions must never return. The called functions are `std::strtoul`
+        and @ref to_unicode. Neither function can loop forever, so the loop
+        body will never loop forever which contradicts the assumption that the
+        loop body does not terminate, q.e.d.\n
+
+        Lemma: The loop condition for the for loop is eventually false.\n
+
+        Proof (by contradiction): Assume the loop does not terminate. Due to
+        the above lemma, this can only be due to a tautological loop
+        condition; that is, the loop condition i < m_cursor - 1 must always be
+        true. Let x be the change of i for any loop iteration. Then
+        m_start + 1 + x < m_cursor - 1 must hold to loop indefinitely.
+        This can be rephrased to m_cursor - m_start - 2 > x. With the
+        precondition, we x <= 0, meaning that the loop condition holds
+        indefinitly if i is always decreased. However, observe that the
+        value of i is strictly increasing with each iteration, as it is
+        incremented by 1 in the iteration expression and never
+        decremented inside the loop body. Hence, the loop condition
+        will eventually be false which contradicts the assumption that
+        the loop condition is a tautology, q.e.d.
 
         @return string value of current token without opening and closing
         quotes
@@ -8415,6 +8581,8 @@ basic_json_parser_63:
         */
         string_t get_string() const
         {
+            assert(m_cursor - m_start >= 2);
+
             string_t result;
             result.reserve(static_cast<size_t>(m_cursor - m_start - 2));
 
@@ -9087,6 +9255,8 @@ basic_json_parser_63:
 
         /*!
         @brief create and return a reference to the pointed to value
+
+        @complexity Linear in the number of reference tokens.
         */
         reference get_and_create(reference j) const
         {
@@ -9536,6 +9706,7 @@ basic_json_parser_63:
             basic_json result;
 
             // iterate the JSON object values
+            assert(value.m_value.object != nullptr);
             for (const auto& element : *value.m_value.object)
             {
                 if (not element.second.is_primitive())
