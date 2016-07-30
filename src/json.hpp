@@ -32,7 +32,6 @@ SOFTWARE.
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cerrno>
 #include <ciso646>
 #include <cmath>
 #include <cstddef>
@@ -44,6 +43,7 @@ SOFTWARE.
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <locale>
 #include <map>
 #include <memory>
 #include <numeric>
@@ -478,7 +478,7 @@ class basic_json
 
     @tparam ArrayType  container type to store arrays (e.g., `std::vector` or
     `std::list`)
-    @tparam AllocatorType  allocator to use for arrays (e.g., `std::allocator`)
+    @tparam AllocatorType allocator to use for arrays (e.g., `std::allocator`)
 
     #### Default type
 
@@ -715,15 +715,14 @@ class basic_json
     > that implementations will agree exactly on their numeric values.
 
     As this range is a subrange (when considered in conjunction with the
-    number_integer_t type) of the exactly supported range [0, UINT64_MAX], this
-    class's integer type is interoperable.
+    number_integer_t type) of the exactly supported range [0, UINT64_MAX],
+    this class's integer type is interoperable.
 
     #### Storage
 
     Integer number values are stored directly inside a @ref basic_json type.
 
     @sa @ref number_float_t -- type for number values (floating-point)
-
     @sa @ref number_integer_t -- type for number values (integer)
 
     @since version 2.0.0
@@ -854,6 +853,7 @@ class basic_json
         };
         std::unique_ptr<T, decltype(deleter)> object(alloc.allocate(1), deleter);
         alloc.construct(object.get(), std::forward<Args>(args)...);
+        assert(object.get() != nullptr);
         return object.release();
     }
 
@@ -1021,12 +1021,13 @@ class basic_json
     @brief per-element parser callback type
 
     With a parser callback function, the result of parsing a JSON text can be
-    influenced. When passed to @ref parse(std::istream&, parser_callback_t) or
-    @ref parse(const string_t&, parser_callback_t), it is called on certain
-    events (passed as @ref parse_event_t via parameter @a event) with a set
-    recursion depth @a depth and context JSON value @a parsed. The return
-    value of the callback function is a boolean indicating whether the element
-    that emitted the callback shall be kept or not.
+    influenced. When passed to @ref parse(std::istream&, const
+    parser_callback_t) or @ref parse(const string_t&, const parser_callback_t),
+    it is called on certain events (passed as @ref parse_event_t via parameter
+    @a event) with a set recursion depth @a depth and context JSON value
+    @a parsed. The return value of the callback function is a boolean
+    indicating whether the element that emitted the callback shall be kept or
+    not.
 
     We distinguish six scenarios (determined by the event type) in which the
     callback function can be called. The following table describes the values
@@ -1509,8 +1510,8 @@ class basic_json
 
     Create an unsigned integer number JSON value with a given content.
 
-    @tparam T  helper type to compare number_unsigned_t and unsigned int
-    (not visible in) the interface.
+    @tparam T  helper type to compare number_unsigned_t and unsigned int (not
+    visible in) the interface.
 
     @param[in] val  an integer to create a JSON number from
 
@@ -1574,8 +1575,8 @@ class basic_json
     disallows NaN values:
     > Numeric values that cannot be represented in the grammar below (such as
     > Infinity and NaN) are not permitted.
-    In case the parameter @a val is not a number, a JSON null value is
-    created instead.
+    In case the parameter @a val is not a number, a JSON null value is created
+    instead.
 
     @complexity Constant.
 
@@ -1648,21 +1649,21 @@ class basic_json
 
     1. If the list is empty, an empty JSON object value `{}` is created.
     2. If the list consists of pairs whose first element is a string, a JSON
-    object value is created where the first elements of the pairs are treated
-    as keys and the second elements are as values.
+       object value is created where the first elements of the pairs are
+       treated as keys and the second elements are as values.
     3. In all other cases, an array is created.
 
     The rules aim to create the best fit between a C++ initializer list and
     JSON values. The rationale is as follows:
 
     1. The empty initializer list is written as `{}` which is exactly an empty
-    JSON object.
+       JSON object.
     2. C++ has now way of describing mapped types other than to list a list of
-    pairs. As JSON requires that keys must be of type string, rule 2 is the
-    weakest constraint one can pose on initializer lists to interpret them as
-    an object.
+       pairs. As JSON requires that keys must be of type string, rule 2 is the
+       weakest constraint one can pose on initializer lists to interpret them
+       as an object.
     3. In all other cases, the initializer list could not be interpreted as
-    JSON object type, so interpreting it as JSON array type is safe.
+       JSON object type, so interpreting it as JSON array type is safe.
 
     With the rules described above, the following JSON values cannot be
     expressed by an initializer list:
@@ -2009,7 +2010,7 @@ class basic_json
 
     @since version 2.0.0
     */
-    explicit basic_json(std::istream& i, parser_callback_t cb = nullptr)
+    explicit basic_json(std::istream& i, const parser_callback_t cb = nullptr)
     {
         *this = parser(i, cb).parse();
     }
@@ -3833,7 +3834,7 @@ class basic_json
 
     /*!
     @brief overload for a default value of type const char*
-    @copydoc basic_json::value(const typename object_t::key_type&, ValueType)
+    @copydoc basic_json::value(const typename object_t::key_type&, ValueType) const
     */
     string_t value(const typename object_t::key_type& key, const char* default_value) const
     {
@@ -3877,7 +3878,7 @@ class basic_json
     @liveexample{The example below shows how object elements can be queried
     with a default value.,basic_json__value_ptr}
 
-    @sa @ref operator[](const json_ptr&) for unchecked access by reference
+    @sa @ref operator[](const json_pointer&) for unchecked access by reference
 
     @since version 2.0.2
     */
@@ -3908,7 +3909,7 @@ class basic_json
 
     /*!
     @brief overload for a default value of type const char*
-    @copydoc basic_json::value(const json_pointer&, ValueType)
+    @copydoc basic_json::value(const json_pointer&, ValueType) const
     */
     string_t value(const json_pointer& ptr, const char* default_value) const
     {
@@ -4723,6 +4724,10 @@ class basic_json
             object      | result of function `object_t::empty()`
             array       | result of function `array_t::empty()`
 
+    @note This function does not return whether a string stored as JSON value
+    is empty - it returns whether the JSON container itself is empty which is
+    false in the case of a string.
+
     @complexity Constant, as long as @ref array_t and @ref object_t satisfy
     the Container concept; that is, their `empty()` functions have constant
     complexity.
@@ -4752,12 +4757,14 @@ class basic_json
 
             case value_t::array:
             {
+                // delegate call to array_t::empty()
                 assert(m_value.array != nullptr);
                 return m_value.array->empty();
             }
 
             case value_t::object:
             {
+                // delegate call to object_t::empty()
                 assert(m_value.object != nullptr);
                 return m_value.object->empty();
             }
@@ -4785,6 +4792,10 @@ class basic_json
             number      | `1`
             object      | result of function object_t::size()
             array       | result of function array_t::size()
+
+    @note This function does not return the length of a string stored as JSON
+    value - it returns the number of elements in the JSON value which is 1 in
+    the case of a string.
 
     @complexity Constant, as long as @ref array_t and @ref object_t satisfy
     the Container concept; that is, their size() functions have constant
@@ -4816,12 +4827,14 @@ class basic_json
 
             case value_t::array:
             {
+                // delegate call to array_t::size()
                 assert(m_value.array != nullptr);
                 return m_value.array->size();
             }
 
             case value_t::object:
             {
+                // delegate call to object_t::size()
                 assert(m_value.object != nullptr);
                 return m_value.object->size();
             }
@@ -4876,12 +4889,14 @@ class basic_json
         {
             case value_t::array:
             {
+                // delegate call to array_t::max_size()
                 assert(m_value.array != nullptr);
                 return m_value.array->max_size();
             }
 
             case value_t::object:
             {
+                // delegate call to object_t::max_size()
                 assert(m_value.object != nullptr);
                 return m_value.object->max_size();
             }
@@ -5971,14 +5986,14 @@ class basic_json
         // string->float->string, string->double->string or string->long
         // double->string; to be safe, we read this value from
         // std::numeric_limits<number_float_t>::digits10
-        const auto old_preicison = o.precision(std::numeric_limits<double>::digits10);
+        const auto old_precision = o.precision(std::numeric_limits<double>::digits10);
 
         // do the actual serialization
         j.dump(o, pretty_print, static_cast<unsigned int>(indentation));
 
         // reset locale and precision
         o.imbue(old_locale);
-        o.precision(old_preicison);
+        o.precision(old_precision);
         return o;
     }
 
@@ -6022,12 +6037,13 @@ class basic_json
     @liveexample{The example below demonstrates the `parse()` function with
     and without callback function.,parse__string__parser_callback_t}
 
-    @sa @ref parse(std::istream&, parser_callback_t) for a version that reads
-    from an input stream
+    @sa @ref parse(std::istream&, const parser_callback_t) for a version that
+    reads from an input stream
 
     @since version 1.0.0
     */
-    static basic_json parse(const string_t& s, parser_callback_t cb = nullptr)
+    static basic_json parse(const string_t& s,
+                            const parser_callback_t cb = nullptr)
     {
         return parser(s, cb).parse();
     }
@@ -6053,20 +6069,22 @@ class basic_json
     @liveexample{The example below demonstrates the `parse()` function with
     and without callback function.,parse__istream__parser_callback_t}
 
-    @sa @ref parse(const string_t&, parser_callback_t) for a version that
-    reads from a string
+    @sa @ref parse(const string_t&, const parser_callback_t) for a version
+    that reads from a string
 
     @since version 1.0.0
     */
-    static basic_json parse(std::istream& i, parser_callback_t cb = nullptr)
+    static basic_json parse(std::istream& i,
+                            const parser_callback_t cb = nullptr)
     {
         return parser(i, cb).parse();
     }
 
     /*!
-    @copydoc parse(std::istream&, parser_callback_t)
+    @copydoc parse(std::istream&, const parser_callback_t)
     */
-    static basic_json parse(std::istream&& i, parser_callback_t cb = nullptr)
+    static basic_json parse(std::istream&& i,
+                            const parser_callback_t cb = nullptr)
     {
         return parser(i, cb).parse();
     }
@@ -6089,8 +6107,8 @@ class basic_json
     @liveexample{The example below shows how a JSON value is constructed by
     reading a serialization from a stream.,operator_deserialize}
 
-    @sa parse(std::istream&, parser_callback_t) for a variant with a parser
-    callback function to filter values while parsing
+    @sa parse(std::istream&, const parser_callback_t) for a variant with a
+    parser callback function to filter values while parsing
 
     @since version 1.0.0
     */
@@ -6118,7 +6136,18 @@ class basic_json
     // convenience functions //
     ///////////////////////////
 
-    /// return the type as string
+    /*!
+    @brief return the type as string
+
+    Returns the type name as string to be used in error messages - usually to
+    indicate that a function was called on a wrong JSON type.
+
+    @return basically a string representation of a the @ref m_type member
+
+    @complexity Constant.
+
+    @since version 1.0.0
+    */
     std::string type_name() const
     {
         switch (m_type)
@@ -7502,7 +7531,7 @@ class basic_json
             : m_stream(s), m_buffer()
         {
             assert(m_stream != nullptr);
-            getline(*m_stream, m_buffer);
+            std::getline(*m_stream, m_buffer);
             m_content = reinterpret_cast<const lexer_char_t*>(m_buffer.c_str());
             assert(m_content != nullptr);
             m_buffer_start = m_start = m_cursor = m_content;
@@ -7606,7 +7635,7 @@ class basic_json
         }
 
         /// return name of values of type token_type (only used for errors)
-        static std::string token_type_name(token_type t)
+        static std::string token_type_name(const token_type t)
         {
             switch (t)
             {
@@ -8534,8 +8563,8 @@ basic_json_parser_63:
            according to the nature of the escape. Some escapes create new
            characters (e.g., `"\\n"` is replaced by `"\n"`), some are copied
            as is (e.g., `"\\\\"`). Furthermore, Unicode escapes of the shape
-           `"\\uxxxx"` need special care. In this case, @ref to_unicode takes
-           care of the construction of the values.
+           `"\\uxxxx"` need special care. In this case, to_unicode takes care
+           of the construction of the values.
         2. Unescaped characters are copied as is.
 
         @pre `m_cursor - m_start >= 2`, meaning the length of the last token
@@ -8553,9 +8582,9 @@ basic_json_parser_63:
         Proof (by contradiction): Assume the loop body does not terminate. As
         the loop body does not contain another loop, one of the called
         functions must never return. The called functions are `std::strtoul`
-        and @ref to_unicode. Neither function can loop forever, so the loop
-        body will never loop forever which contradicts the assumption that the
-        loop body does not terminate, q.e.d.\n
+        and to_unicode. Neither function can loop forever, so the loop body
+        will never loop forever which contradicts the assumption that the loop
+        body does not terminate, q.e.d.\n
 
         Lemma: The loop condition for the for loop is eventually false.\n
 
@@ -8563,15 +8592,15 @@ basic_json_parser_63:
         the above lemma, this can only be due to a tautological loop
         condition; that is, the loop condition i < m_cursor - 1 must always be
         true. Let x be the change of i for any loop iteration. Then
-        m_start + 1 + x < m_cursor - 1 must hold to loop indefinitely.
-        This can be rephrased to m_cursor - m_start - 2 > x. With the
+        m_start + 1 + x < m_cursor - 1 must hold to loop indefinitely. This
+        can be rephrased to m_cursor - m_start - 2 > x. With the
         precondition, we x <= 0, meaning that the loop condition holds
-        indefinitly if i is always decreased. However, observe that the
-        value of i is strictly increasing with each iteration, as it is
-        incremented by 1 in the iteration expression and never
-        decremented inside the loop body. Hence, the loop condition
-        will eventually be false which contradicts the assumption that
-        the loop condition is a tautology, q.e.d.
+        indefinitly if i is always decreased. However, observe that the value
+        of i is strictly increasing with each iteration, as it is incremented
+        by 1 in the iteration expression and never decremented inside the loop
+        body. Hence, the loop condition will eventually be false which
+        contradicts the assumption that the loop condition is a tautology,
+        q.e.d.
 
         @return string value of current token without opening and closing
         quotes
@@ -8699,11 +8728,6 @@ basic_json_parser_63:
         the number
 
         @return the floating point number
-
-        @bug This function uses `std::strtof`, `std::strtod`, or `std::strtold`
-        which use the current C locale to determine which character is used as
-        decimal point character. This may yield to parse errors if the locale
-        does not used `.`.
         */
         long double str_to_float_t(long double* /* type */, char** endptr) const
         {
@@ -8888,7 +8912,7 @@ basic_json_parser_63:
     {
       public:
         /// constructor for strings
-        parser(const string_t& s, parser_callback_t cb = nullptr) noexcept
+        parser(const string_t& s, const parser_callback_t cb = nullptr) noexcept
             : callback(cb), m_lexer(s)
         {
             // read first token
@@ -8896,7 +8920,7 @@ basic_json_parser_63:
         }
 
         /// a parser reading from an input stream
-        parser(std::istream& _is, parser_callback_t cb = nullptr) noexcept
+        parser(std::istream& _is, const parser_callback_t cb = nullptr) noexcept
             : callback(cb), m_lexer(&_is)
         {
             // read first token
@@ -9139,7 +9163,7 @@ basic_json_parser_63:
         /// current level of recursion
         int depth = 0;
         /// callback function
-        parser_callback_t callback;
+        const parser_callback_t callback = nullptr;
         /// the type of the last read token
         typename lexer::token_type last_token = lexer::token_type::uninitialized;
         /// the lexer
@@ -9590,7 +9614,7 @@ basic_json_parser_63:
 
         @param[in,out] s  the string to manipulate
         @param[in]     f  the substring to replace with @a t
-        @param[out]    t  the string to replace @a f
+        @param[in]     t  the string to replace @a f
 
         @return The string @a s where all occurrences of @a f are replaced
                 with @a t.
@@ -10450,7 +10474,7 @@ struct hash<nlohmann::json>
 @brief user-defined string literal for JSON values
 
 This operator implements a user-defined string literal for JSON objects. It
-can be used by adding \p "_json" to a string literal and returns a JSON object
+can be used by adding `"_json"` to a string literal and returns a JSON object
 if no parse error occurred.
 
 @param[in] s  a string representation of a JSON object
@@ -10465,6 +10489,13 @@ inline nlohmann::json operator "" _json(const char* s, std::size_t)
 
 /*!
 @brief user-defined string literal for JSON pointer
+
+This operator implements a user-defined string literal for JSON Pointers. It
+can be used by adding `"_json"` to a string literal and returns a JSON pointer
+object if no parse error occurred.
+
+@param[in] s  a string representation of a JSON Pointer
+@return a JSON pointer object
 
 @since version 2.0.0
 */
