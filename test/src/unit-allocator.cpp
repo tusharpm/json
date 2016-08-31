@@ -32,6 +32,13 @@ SOFTWARE.
 #include "json.hpp"
 using nlohmann::json;
 
+// allow to disable exceptions
+#ifndef __cpp_exceptions
+    #define try      if (true)
+    #define catch(X) if (false)
+    #define throw(X) std::abort()
+#endif
+
 // special test case to check if memory is leaked if constructor throws
 
 template<class T>
@@ -40,7 +47,7 @@ struct bad_allocator : std::allocator<T>
     template<class... Args>
     void construct(T*, Args&& ...)
     {
-        throw std::bad_alloc();
+        throw (std::bad_alloc());
     }
 };
 
@@ -76,7 +83,7 @@ struct my_allocator : std::allocator<T>
         if (next_construct_fails)
         {
             next_construct_fails = false;
-            throw std::bad_alloc();
+            throw (std::bad_alloc());
         }
         else
         {
@@ -89,7 +96,7 @@ struct my_allocator : std::allocator<T>
         if (next_deallocate_fails)
         {
             next_deallocate_fails = false;
-            throw std::bad_alloc();
+            throw (std::bad_alloc());
         }
         else
         {
@@ -102,7 +109,7 @@ struct my_allocator : std::allocator<T>
         if (next_destroy_fails)
         {
             next_destroy_fails = false;
-            throw std::bad_alloc();
+            throw (std::bad_alloc());
         }
         else
         {
