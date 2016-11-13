@@ -86,7 +86,7 @@ SOFTWARE.
 
 // allow to disable exceptions
 #ifdef JSON_NOEXCEPTION
-    #define JSON_THROW(exception)
+    #define JSON_THROW(exception) std::abort()
     #define JSON_TRY if(true)
     #define JSON_CATCH(exception) if(false)
 #else
