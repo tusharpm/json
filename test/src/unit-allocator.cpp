@@ -33,11 +33,11 @@ SOFTWARE.
 using nlohmann::json;
 
 // allow to disable exceptions
-#ifndef __cpp_exceptions
-    #define try      if (true)
-    #define catch(X) if (false)
-    #define throw(X) std::abort()
-#endif
+//#ifndef __cpp_exceptions
+//    #define try      if (true)
+//    #define catch(X) if (false)
+//    #define throw(X) std::abort()
+//#endif
 
 // special test case to check if memory is leaked if constructor throws
 
@@ -51,7 +51,7 @@ struct bad_allocator : std::allocator<T>
     }
 };
 
-TEST_CASE("bad_alloc")
+TEST_CASE("bad_alloc", "[throw]")
 {
     SECTION("bad_alloc")
     {
@@ -118,7 +118,7 @@ struct my_allocator : std::allocator<T>
     }
 };
 
-TEST_CASE("controlled bad_alloc")
+TEST_CASE("controlled bad_alloc", "[throw]")
 {
     // create JSON type using the throwing allocator
     using my_json = nlohmann::basic_json<std::map,

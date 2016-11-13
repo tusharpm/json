@@ -8954,7 +8954,7 @@ basic_json_parser_66:
                             else if (codepoint >= 0xDC00 and codepoint <= 0xDFFF)
                             {
                                 // we found a lone low surrogate
-                                throw std::invalid_argument("missing high surrogate");
+                                JSON_THROW(std::invalid_argument("missing high surrogate"));
                             }
                             else
                             {
