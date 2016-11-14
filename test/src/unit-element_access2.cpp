@@ -31,7 +31,7 @@ SOFTWARE.
 #include "json.hpp"
 using nlohmann::json;
 
-TEST_CASE("element access 2")
+TEST_CASE("element access 2", "[throw]")
 {
     SECTION("object")
     {
