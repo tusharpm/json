@@ -50,7 +50,7 @@ SOFTWARE.
 #include <memory> // addressof, allocator, allocator_traits, unique_ptr
 #include <numeric> // accumulate
 #include <sstream> // stringstream
-#include <stdexcept> // domain_error, invalid_argument, out_of_range
+#include <stdexcept> // domain_error, out_of_range
 #include <string> // getline, stoi, string, to_string
 #include <type_traits> // add_pointer, enable_if, is_arithmetic, is_base_of, is_const, is_constructible, is_convertible, is_floating_point, is_integral, is_nothrow_move_assignable, std::is_nothrow_move_constructible, std::is_pointer, std::is_reference, std::is_same, remove_const, remove_pointer, remove_reference
 #include <utility> // declval, forward, make_pair, move, pair, swap
@@ -245,6 +245,78 @@ template <
     >
 class basic_json
 {
+  public:
+    /*!
+    @brief general exception of the @ref basic_json class
+
+    id  | name                           | description
+    --- | ------------------------------ | ---------------------------------
+    101 | json.exception.parse_error.101 | An unexpected token was read while deserializing a JSON text.
+    102 | json.exception.parse_error.102 | An incomplete Unicode surrogate pair was read.
+    103 | json.exception.parse_error.103 | A Unicode code point above 0x10FFFF was read.
+    104 | json.exception.parse_error.104 | A JSON Patch must be an array of objects.
+    105 | json.exception.parse_error.105 | A JSON Patch operation contained an error.
+    201 | json.exception.invalid_iterator.201 | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
+    */
+    class exception : public std::exception
+    {
+      public:
+        /// create exception with id an explanatory string
+        exception(int id_, const std::string& ename, const std::string& what_arg_)
+            : id(id_),
+              what_arg("[json.exception." + ename + "." + std::to_string(id_) + "] " + what_arg_)
+        {}
+
+        /// returns the explanatory string
+        virtual const char* what() const noexcept
+        {
+            return what_arg.c_str();
+        }
+
+        /// the id of the exception
+        const int id;
+
+      private:
+        /// the explanatory string
+        const std::string what_arg;
+    };
+
+    /*!
+    @brief exception indicating a parse error
+
+    This excpetion is thrown by the library when a parse error occurs. Parse
+    errors can occur during the deserialization of JSON text as well as when
+    using JSON Patch.
+    */
+    class parse_error : public exception
+    {
+      public:
+        /*!
+        @brief create a parse error exception
+        @param[in] id_        the id of the exception
+        @param[in] byte_      the byte index where the error occured (or 0 if
+                              the position cannot be determined)
+        @param[in] what_arg_  the explanatory string
+        */
+        parse_error(int id_, int byte_, const std::string what_arg_)
+            : exception(id_, "parse_error", "parse error" +
+                        (byte_ != 0 ? (" at " + std::to_string(byte_)) : "") +
+                        ": " + what_arg_),
+              byte(byte_)
+        {}
+
+        /// byte index of the parse error
+        const int byte;
+    };
+
+    class invalid_iterator : public exception
+    {
+      public:
+        invalid_iterator(int id_, const std::string what_arg_)
+            : exception(id_, "invalid_iterator", what_arg_)
+        {}
+    };
+
   private:
     /// workaround type for MSVC
     using basic_json_t = basic_json<ObjectType, ArrayType, StringType,
@@ -1820,7 +1892,7 @@ class basic_json
     @pre Iterators @a first and @a last must be initialized. **This
          precondition is enforced with an assertion.**
 
-    @throw std::domain_error if iterators are not compatible; that is, do not
+    @throw invalid_iterator if iterators are not compatible; that is, do not
     belong to the same JSON value; example: `"iterators are not compatible"`
     @throw std::out_of_range if iterators are for a primitive type (number,
     boolean, or string) where an out of range error can be detected easily;
@@ -1847,7 +1919,7 @@ class basic_json
         // make sure iterator fits the current value
         if (first.m_object != last.m_object)
         {
-            JSON_THROW(std::domain_error("iterators are not compatible"));
+            JSON_THROW(invalid_iterator(201, "iterators are not compatible"));
         }
 
         // copy type from first iterator
@@ -6126,7 +6198,7 @@ class basic_json
     @param[in,out] i  input stream to read a serialized JSON value from
     @param[in,out] j  JSON value to write the deserialized input to
 
-    @throw std::invalid_argument in case of parse errors
+    @throw parse_error in case of parse errors
 
     @complexity Linear in the length of the input. The parser is a predictive
     LL(1) parser.
@@ -7668,15 +7740,15 @@ class basic_json
 
         @throw std::out_of_range if code point is > 0x10ffff; example: `"code
         points above 0x10FFFF are invalid"`
-        @throw std::invalid_argument if the low surrogate is invalid; example:
+        @throw parse_error if the low surrogate is invalid; example:
         `""missing or wrong low surrogate""`
 
         @complexity Constant.
 
         @see <http://en.wikipedia.org/wiki/UTF-8#Sample_code>
         */
-        static string_t to_unicode(const std::size_t codepoint1,
-                                   const std::size_t codepoint2 = 0)
+        string_t to_unicode(const std::size_t codepoint1,
+                            const std::size_t codepoint2 = 0) const
         {
             // calculate the code point from the given code points
             std::size_t codepoint = codepoint1;
@@ -7699,7 +7771,7 @@ class basic_json
                 }
                 else
                 {
-                    JSON_THROW(std::invalid_argument("missing or wrong low surrogate"));
+                    JSON_THROW(parse_error(102, get_position(), "missing or wrong low surrogate"));
                 }
             }
 
@@ -7733,7 +7805,7 @@ class basic_json
             }
             else
             {
-                JSON_THROW(std::out_of_range("code points above 0x10FFFF are invalid"));
+                JSON_THROW(parse_error(103, get_position(), "code points above 0x10FFFF are invalid"));
             }
 
             return result;
@@ -7991,6 +8063,7 @@ basic_json_parser_6:
                         goto basic_json_parser_6;
                     }
                     {
+                        position += static_cast<size_t>((m_cursor - m_start));
                         continue;
                     }
 basic_json_parser_9:
@@ -8724,6 +8797,7 @@ basic_json_parser_66:
 
             }
 
+            position += static_cast<size_t>((m_cursor - m_start));
             return last_token_type;
         }
 
@@ -8941,7 +9015,7 @@ basic_json_parser_66:
                                 // make sure there is a subsequent unicode
                                 if ((i + 6 >= m_limit) or * (i + 5) != '\\' or * (i + 6) != 'u')
                                 {
-                                    JSON_THROW(std::invalid_argument("missing low surrogate"));
+                                    JSON_THROW(parse_error(102, get_position(), "missing low surrogate"));
                                 }
 
                                 // get code yyyy from uxxxx\uyyyy
@@ -8954,7 +9028,7 @@ basic_json_parser_66:
                             else if (codepoint >= 0xDC00 and codepoint <= 0xDFFF)
                             {
                                 // we found a lone low surrogate
-                                JSON_THROW(std::invalid_argument("missing high surrogate"));
+                                JSON_THROW(parse_error(102, get_position(), "missing high surrogate"));
                             }
                             else
                             {
@@ -9151,6 +9225,11 @@ basic_json_parser_66:
             result.m_type = type;
         }
 
+        constexpr size_t get_position() const
+        {
+            return position;
+        }
+
       private:
         /// optional input stream
         std::istream* m_stream = nullptr;
@@ -9168,6 +9247,8 @@ basic_json_parser_66:
         const lexer_char_t* m_limit = nullptr;
         /// the last token type
         token_type last_token_type = token_type::end_of_input;
+        /// current position in the input (read bytes)
+        size_t position = 0;
     };
 
     /*!
@@ -9422,12 +9503,12 @@ basic_json_parser_66:
         {
             if (t != last_token)
             {
-                std::string error_msg = "parse error - unexpected ";
+                std::string error_msg = "unexpected ";
                 error_msg += (last_token == lexer::token_type::parse_error ? ("'" +  m_lexer.get_token_string() +
                               "'") :
                               lexer::token_type_name(last_token));
                 error_msg += "; expected " + lexer::token_type_name(t);
-                JSON_THROW(std::invalid_argument(error_msg));
+                JSON_THROW(parse_error(101, m_lexer.get_position(), error_msg));
             }
         }
 
@@ -9435,11 +9516,11 @@ basic_json_parser_66:
         {
             if (t == last_token)
             {
-                std::string error_msg = "parse error - unexpected ";
+                std::string error_msg = "unexpected ";
                 error_msg += (last_token == lexer::token_type::parse_error ? ("'" +  m_lexer.get_token_string() +
                               "'") :
                               lexer::token_type_name(last_token));
-                JSON_THROW(std::invalid_argument(error_msg));
+                JSON_THROW(parse_error(101, m_lexer.get_position(), error_msg));
             }
         }
 
@@ -9637,9 +9718,9 @@ basic_json_parser_66:
 
         @complexity Linear in the length of the JSON pointer.
 
-        @throw std::out_of_range      if the JSON pointer can not be resolved
-        @throw std::domain_error      if an array index begins with '0'
-        @throw std::invalid_argument  if an array index was not a number
+        @throw std::out_of_range  if the JSON pointer can not be resolved
+        @throw std::domain_error  if an array index begins with '0'
+        @throw parse_error        if an array index was not a number
         */
         reference get_unchecked(pointer ptr) const
         {
@@ -10086,9 +10167,9 @@ basic_json_parser_66:
 
     @complexity Constant.
 
-    @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw std::out_of_range  if the JSON pointer can not be resolved
+    @throw std::domain_error  if an array index begins with '0'
+    @throw parse_error        if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,operatorjson_pointer}
 
@@ -10113,9 +10194,9 @@ basic_json_parser_66:
 
     @complexity Constant.
 
-    @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw std::out_of_range  if the JSON pointer can not be resolved
+    @throw std::domain_error  if an array index begins with '0'
+    @throw parse_error        if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,operatorjson_pointer_const}
 
@@ -10138,9 +10219,9 @@ basic_json_parser_66:
 
     @complexity Constant.
 
-    @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw std::out_of_range  if the JSON pointer can not be resolved
+    @throw std::domain_error  if an array index begins with '0'
+    @throw parse_error        if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,at_json_pointer}
 
@@ -10163,9 +10244,9 @@ basic_json_parser_66:
 
     @complexity Constant.
 
-    @throw std::out_of_range      if the JSON pointer can not be resolved
-    @throw std::domain_error      if an array index begins with '0'
-    @throw std::invalid_argument  if an array index was not a number
+    @throw std::out_of_range  if the JSON pointer can not be resolved
+    @throw std::domain_error  if an array index begins with '0'
+    @throw parse_error        if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,at_json_pointer_const}
 
@@ -10416,7 +10497,7 @@ basic_json_parser_66:
         if (not json_patch.is_array())
         {
             // a JSON patch must be an array of objects
-            JSON_THROW(std::invalid_argument("JSON patch must be an array of objects"));
+            JSON_THROW(parse_error(104, 0, "JSON patch must be an array of objects"));
         }
 
         // iterate and apply th eoperations
@@ -10436,13 +10517,13 @@ basic_json_parser_66:
                 // check if desired value is present
                 if (it == val.m_value.object->end())
                 {
-                    JSON_THROW(std::invalid_argument(error_msg + " must have member '" + member + "'"));
+                    JSON_THROW(parse_error(105, 0, error_msg + " must have member '" + member + "'"));
                 }
 
                 // check if result is of type string
                 if (string_type and not it->second.is_string())
                 {
-                    JSON_THROW(std::invalid_argument(error_msg + " must have string member '" + member + "'"));
+                    JSON_THROW(parse_error(105, 0, error_msg + " must have string member '" + member + "'"));
                 }
 
                 // no error: return value
@@ -10452,7 +10533,7 @@ basic_json_parser_66:
             // type check
             if (not val.is_object())
             {
-                JSON_THROW(std::invalid_argument("JSON patch must be an array of objects"));
+                JSON_THROW(parse_error(104, 0, "JSON patch must be an array of objects"));
             }
 
             // collect mandatory members
@@ -10535,7 +10616,7 @@ basic_json_parser_66:
                 {
                     // op must be "add", "remove", "replace", "move", "copy", or
                     // "test"
-                    JSON_THROW(std::invalid_argument("operation value '" + op + "' is invalid"));
+                    JSON_THROW(parse_error(105, 0, "operation value '" + op + "' is invalid"));
                 }
             }
         }
