@@ -36,14 +36,17 @@ TEST_CASE("JSON pointers")
 {
     SECTION("errors")
     {
-        CHECK_THROWS_AS(json::json_pointer("foo"), std::domain_error);
-        CHECK_THROWS_WITH(json::json_pointer("foo"), "JSON pointer must be empty or begin with '/'");
+        CHECK_THROWS_AS(json::json_pointer("foo"), json::parse_error);
+        CHECK_THROWS_WITH(json::json_pointer("foo"),
+                          "[json.exception.parse_error.107] parse error at 1: JSON pointer must be empty or begin with '/'");
 
-        CHECK_THROWS_AS(json::json_pointer("/~~"), std::domain_error);
-        CHECK_THROWS_WITH(json::json_pointer("/~~"), "escape error: '~' must be followed with '0' or '1'");
+        CHECK_THROWS_AS(json::json_pointer("/~~"), json::parse_error);
+        CHECK_THROWS_WITH(json::json_pointer("/~~"),
+                          "[json.exception.parse_error.108] parse error: escape character '~' must be followed with '0' or '1'");
 
-        CHECK_THROWS_AS(json::json_pointer("/~"), std::domain_error);
-        CHECK_THROWS_WITH(json::json_pointer("/~"), "escape error: '~' must be followed with '0' or '1'");
+        CHECK_THROWS_AS(json::json_pointer("/~"), json::parse_error);
+        CHECK_THROWS_WITH(json::json_pointer("/~"),
+                          "[json.exception.parse_error.108] parse error: escape character '~' must be followed with '0' or '1'");
 
         json::json_pointer p;
         CHECK_THROWS_AS(p.top(), std::domain_error);
@@ -121,10 +124,12 @@ TEST_CASE("JSON pointers")
 
             // unresolved access
             json j_primitive = 1;
-            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer], "unresolved reference token 'foo'");
-            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer), "unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], json::out_of_range);
+            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer],
+                              "[json.exception.out_of_range.404] unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), json::out_of_range);
+            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer),
+                              "[json.exception.out_of_range.404] unresolved reference token 'foo'");
         }
 
         SECTION("const access")
@@ -182,15 +187,18 @@ TEST_CASE("JSON pointers")
             CHECK(j[json::json_pointer("/m~0n")] == j["m~n"]);
 
             // unescaped access
-            CHECK_THROWS_AS(j.at(json::json_pointer("/a/b")), std::out_of_range);
-            CHECK_THROWS_WITH(j.at(json::json_pointer("/a/b")), "key 'a' not found");
+            CHECK_THROWS_AS(j.at(json::json_pointer("/a/b")), json::out_of_range);
+            CHECK_THROWS_WITH(j.at(json::json_pointer("/a/b")),
+                              "[json.exception.out_of_range.403] key 'a' not found");
 
             // unresolved access
             const json j_primitive = 1;
-            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer], "unresolved reference token 'foo'");
-            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer), "unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive["/foo"_json_pointer], json::out_of_range);
+            CHECK_THROWS_WITH(j_primitive["/foo"_json_pointer],
+                              "[json.exception.out_of_range.404] unresolved reference token 'foo'");
+            CHECK_THROWS_AS(j_primitive.at("/foo"_json_pointer), json::out_of_range);
+            CHECK_THROWS_WITH(j_primitive.at("/foo"_json_pointer),
+                              "[json.exception.out_of_range.404] unresolved reference token 'foo'");
         }
 
         SECTION("user-defined string literal")
@@ -245,14 +253,18 @@ TEST_CASE("JSON pointers")
             CHECK(j == json({1, 13, 3, 33, nullptr, 55}));
 
             // error with leading 0
-            CHECK_THROWS_AS(j["/01"_json_pointer], std::domain_error);
-            CHECK_THROWS_WITH(j["/01"_json_pointer], "array index must not begin with '0'");
-            CHECK_THROWS_AS(j_const["/01"_json_pointer], std::domain_error);
-            CHECK_THROWS_WITH(j_const["/01"_json_pointer], "array index must not begin with '0'");
-            CHECK_THROWS_AS(j.at("/01"_json_pointer), std::domain_error);
-            CHECK_THROWS_WITH(j.at("/01"_json_pointer), "array index must not begin with '0'");
-            CHECK_THROWS_AS(j_const.at("/01"_json_pointer), std::domain_error);
-            CHECK_THROWS_WITH(j_const.at("/01"_json_pointer), "array index must not begin with '0'");
+            CHECK_THROWS_AS(j["/01"_json_pointer], json::parse_error);
+            CHECK_THROWS_WITH(j["/01"_json_pointer],
+                              "[json.exception.parse_error.106] parse error: array index must not begin with '0'");
+            CHECK_THROWS_AS(j_const["/01"_json_pointer], json::parse_error);
+            CHECK_THROWS_WITH(j_const["/01"_json_pointer],
+                              "[json.exception.parse_error.106] parse error: array index must not begin with '0'");
+            CHECK_THROWS_AS(j.at("/01"_json_pointer), json::parse_error);
+            CHECK_THROWS_WITH(j.at("/01"_json_pointer),
+                              "[json.exception.parse_error.106] parse error: array index must not begin with '0'");
+            CHECK_THROWS_AS(j_const.at("/01"_json_pointer), json::parse_error);
+            CHECK_THROWS_WITH(j_const.at("/01"_json_pointer),
+                              "[json.exception.parse_error.106] parse error: array index must not begin with '0'");
 
             // error with incorrect numbers
             CHECK_THROWS_AS(j["/one"_json_pointer] = 1, std::invalid_argument);
@@ -262,14 +274,17 @@ TEST_CASE("JSON pointers")
             CHECK(j == json({1, 13, 3, 33, nullptr, 55, 99}));
 
             // error when using "-" in const object
-            CHECK_THROWS_AS(j_const["/-"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j_const["/-"_json_pointer], "array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j_const["/-"_json_pointer], json::out_of_range);
+            CHECK_THROWS_WITH(j_const["/-"_json_pointer],
+                              "[json.exception.out_of_range.402] array index '-' (3) is out of range");
 
             // error when using "-" with at
-            CHECK_THROWS_AS(j.at("/-"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j.at("/-"_json_pointer), "array index '-' (7) is out of range");
-            CHECK_THROWS_AS(j_const.at("/-"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j_const.at("/-"_json_pointer), "array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j.at("/-"_json_pointer), json::out_of_range);
+            CHECK_THROWS_WITH(j.at("/-"_json_pointer),
+                              "[json.exception.out_of_range.402] array index '-' (7) is out of range");
+            CHECK_THROWS_AS(j_const.at("/-"_json_pointer), json::out_of_range);
+            CHECK_THROWS_WITH(j_const.at("/-"_json_pointer),
+                              "[json.exception.out_of_range.402] array index '-' (3) is out of range");
         }
 
         SECTION("const access")
@@ -282,18 +297,22 @@ TEST_CASE("JSON pointers")
             CHECK(j["/2"_json_pointer] == j[2]);
 
             // assign to nonexisting index
-            CHECK_THROWS_AS(j.at("/3"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j.at("/3"_json_pointer), "array index 3 is out of range");
+            CHECK_THROWS_AS(j.at("/3"_json_pointer), json::out_of_range);
+            CHECK_THROWS_WITH(j.at("/3"_json_pointer),
+                              "[json.exception.out_of_range.401] array index 3 is out of range");
 
             // assign to nonexisting index (with gap)
-            CHECK_THROWS_AS(j.at("/5"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j.at("/5"_json_pointer), "array index 5 is out of range");
+            CHECK_THROWS_AS(j.at("/5"_json_pointer), json::out_of_range);
+            CHECK_THROWS_WITH(j.at("/5"_json_pointer),
+                              "[json.exception.out_of_range.401] array index 5 is out of range");
 
             // assign to "-"
-            CHECK_THROWS_AS(j["/-"_json_pointer], std::out_of_range);
-            CHECK_THROWS_WITH(j["/-"_json_pointer], "array index '-' (3) is out of range");
-            CHECK_THROWS_AS(j.at("/-"_json_pointer), std::out_of_range);
-            CHECK_THROWS_WITH(j.at("/-"_json_pointer), "array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j["/-"_json_pointer], json::out_of_range);
+            CHECK_THROWS_WITH(j["/-"_json_pointer],
+                              "[json.exception.out_of_range.402] array index '-' (3) is out of range");
+            CHECK_THROWS_AS(j.at("/-"_json_pointer), json::out_of_range);
+            CHECK_THROWS_WITH(j.at("/-"_json_pointer),
+                              "[json.exception.out_of_range.402] array index '-' (3) is out of range");
         }
 
     }

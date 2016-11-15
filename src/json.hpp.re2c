@@ -249,37 +249,46 @@ class basic_json
     /*!
     @brief general exception of the @ref basic_json class
 
-    id  | name                           | massage | description
-    --- | ------------------------------ | ------- | -------------------------
-    101 | json.exception.parse_error.101 | | An unexpected token was read while deserializing a JSON text.
-    102 | json.exception.parse_error.102 | | An incomplete Unicode surrogate pair was read.
-    103 | json.exception.parse_error.103 | | A Unicode code point above 0x10FFFF was read.
-    104 | json.exception.parse_error.104 | | A JSON Patch must be an array of objects.
-    105 | json.exception.parse_error.105 | | A JSON Patch operation contained an error.
-    201 | json.exception.invalid_iterator.201 | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
-    202 | json.exception.invalid_iterator.202 | In an erase or insert function, the passed iterator @a pos does not belong to the JSON value for which the function was called. It hence does not define a valid position for the deletion/insertion.
-    203 | json.exception.invalid_iterator.203 | Either iterator passed to function @ref erase(InteratorType first, InteratorType last) does not belong to the JSON value from which values shall be erased. It hence does not define a valid range to delete values from.
-    204 | json.exception.invalid_iterator.204 | "iterators out of range" | When an iterator range for a primitive type (number, boolean, or string) is passed to a constructor or an erase function, this range has to be exactly (@ref begin(), @ref end()), because this is the only way the single stored value is expressed. All other ranges are invalid.
-    205 | json.exception.invalid_iterator.205 | "iterator out of range" | When an iterator for a primitive type (number, boolean, or string) is passed to an erase function, the iterator has to be the @ref begin() iterator, because it is the only way to address the stored value. All other iterators are invalid.
-    206 | json.exception.invalid_iterator.206 | "cannot construct with iterators from null" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) belong to a JSON null value and hence to not define a valid range.
-    207 | json.exception.invalid_iterator.207 | "cannot use key() for non-object iterators" | The key() member function can only be used on iterators belonging to a JSON object, because other types do not have a concept of a key.
-    208 | json.exception.invalid_iterator.208 | "cannot use operator[] for object iterators" | The operator[] to specify a concrete offset cannot be used on iterators belonging to a JSON object, because JSON objects are unordered.
-    209 | json.exception.invalid_iterator.209 | "cannot use offsets with object iterators" | The offset operators (+, -, +=, -=) cannot be used on iterators belonging to a JSON object, because JSON objects are unordered.
-    210 | json.exception.invalid_iterator.210 | "iterators do not fit" | The iterator range passed to the insert function are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
-    211 | json.exception.invalid_iterator.211 | "passed iterators may not belong to container" | The iterator range passed to the insert function must not be a subrange of the container to insert to.
-    212 | json.exception.invalid_iterator.212 | "cannot compare iterators of different containers" | When two iterators are compared, they must belong to the same container.
-    213 | json.exception.invalid_iterator.213 | "cannot compare order of object iterators" | The order of object iterators cannot be compated, because JSON objects are unordered.
-    214 | json.exception.invalid_iterator.214 | "cannot get value" | Cannot get value for iterator: Either the iterator belongs to a null value or it is an iterator to a primitive type (number, boolean, or string), but the iterator is different to @ref begin().
-    301 | json.exception.type_error.301 | "cannot create object from initializer list" | ...
-    302 | json.exception.type_error.302 | "type must be object, but is array" | ...
-    303 | json.exception.type_error.303 | "incompatible ReferenceType for get_ref, actual type is object" |
-    304 | json.exception.type_error.304 | "cannot use at() with string" |
-    305 | json.exception.type_error.305 | "cannot use operator[] with string" |
-    306 | json.exception.type_error.306 | "cannot use value() with string" |
-    307 | json.exception.type_error.307 | "cannot use erase() with string" |
-    308 | json.exception.type_error.308 | "cannot use push_back() with string" |
-    309 | json.exception.type_error.309 | "cannot use insert() with" |
-    310 | json.exception.type_error.310 | "cannot use swap() with number" |
+    name / id                      | massage | description
+    ------------------------------ | ------- | -------------------------
+    json.exception.[parse_error](@ref parse_error).101 | "" | An unexpected token was read while deserializing a JSON text.
+    json.exception.[parse_error](@ref parse_error).102 | "" | An incomplete Unicode surrogate pair was read.
+    json.exception.[parse_error](@ref parse_error).103 | "" | A Unicode code point above 0x10FFFF was read.
+    json.exception.[parse_error](@ref parse_error).104 | "" | A JSON Patch must be an array of objects.
+    json.exception.[parse_error](@ref parse_error).105 | "" | A JSON Patch operation contained an error.
+    json.exception.[parse_error](@ref parse_error).106 | "array index must not begin with '0'" | JSON Pointer
+    json.exception.[parse_error](@ref parse_error).107 | "JSON pointer must be empty or begin with '/'" | JSON Pointer
+    json.exception.[parse_error](@ref parse_error).108 | "escape character '~' must be followed with '0' or '1'" | JSON Pointer
+    json.exception.[invalid_iterator](@ref invalid_iterator).201 | "" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
+    json.exception.[invalid_iterator](@ref invalid_iterator).202 | "" | In an erase or insert function, the passed iterator @a pos does not belong to the JSON value for which the function was called. It hence does not define a valid position for the deletion/insertion.
+    json.exception.[invalid_iterator](@ref invalid_iterator).203 | "" | Either iterator passed to function @ref erase(InteratorType first, InteratorType last) does not belong to the JSON value from which values shall be erased. It hence does not define a valid range to delete values from.
+    json.exception.[invalid_iterator](@ref invalid_iterator).204 | "iterators out of range" | When an iterator range for a primitive type (number, boolean, or string) is passed to a constructor or an erase function, this range has to be exactly (@ref begin(), @ref end()), because this is the only way the single stored value is expressed. All other ranges are invalid.
+    json.exception.[invalid_iterator](@ref invalid_iterator).205 | "iterator out of range" | When an iterator for a primitive type (number, boolean, or string) is passed to an erase function, the iterator has to be the @ref begin() iterator, because it is the only way to address the stored value. All other iterators are invalid.
+    json.exception.[invalid_iterator](@ref invalid_iterator).206 | "cannot construct with iterators from null" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) belong to a JSON null value and hence to not define a valid range.
+    json.exception.[invalid_iterator](@ref invalid_iterator).207 | "cannot use key() for non-object iterators" | The key() member function can only be used on iterators belonging to a JSON object, because other types do not have a concept of a key.
+    json.exception.[invalid_iterator](@ref invalid_iterator).208 | "cannot use operator[] for object iterators" | The operator[] to specify a concrete offset cannot be used on iterators belonging to a JSON object, because JSON objects are unordered.
+    json.exception.[invalid_iterator](@ref invalid_iterator).209 | "cannot use offsets with object iterators" | The offset operators (+, -, +=, -=) cannot be used on iterators belonging to a JSON object, because JSON objects are unordered.
+    json.exception.[invalid_iterator](@ref invalid_iterator).210 | "iterators do not fit" | The iterator range passed to the insert function are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
+    json.exception.[invalid_iterator](@ref invalid_iterator).211 | "passed iterators may not belong to container" | The iterator range passed to the insert function must not be a subrange of the container to insert to.
+    json.exception.[invalid_iterator](@ref invalid_iterator).212 | "cannot compare iterators of different containers" | When two iterators are compared, they must belong to the same container.
+    json.exception.[invalid_iterator](@ref invalid_iterator).213 | "cannot compare order of object iterators" | The order of object iterators cannot be compated, because JSON objects are unordered.
+    json.exception.[invalid_iterator](@ref invalid_iterator).214 | "cannot get value" | Cannot get value for iterator: Either the iterator belongs to a null value or it is an iterator to a primitive type (number, boolean, or string), but the iterator is different to @ref begin().
+    json.exception.[type_error](@ref type_error).301 | "cannot create object from initializer list" | ...
+    json.exception.[type_error](@ref type_error).302 | "type must be object, but is array" | ...
+    json.exception.[type_error](@ref type_error).303 | "incompatible ReferenceType for get_ref, actual type is object" | ...
+    json.exception.[type_error](@ref type_error).304 | "cannot use at() with string" | ...
+    json.exception.[type_error](@ref type_error).305 | "cannot use operator[] with string" | ...
+    json.exception.[type_error](@ref type_error).306 | "cannot use value() with string" | ...
+    json.exception.[type_error](@ref type_error).307 | "cannot use erase() with string" | ...
+    json.exception.[type_error](@ref type_error).308 | "cannot use push_back() with string" | ...
+    json.exception.[type_error](@ref type_error).309 | "cannot use insert() with" | ...
+    json.exception.[type_error](@ref type_error).310 | "cannot use swap() with number" | ...
+    json.exception.[out_of_range](@ref out_of_range).401 | "array index 3 is out of range" | ...
+    json.exception.[out_of_range](@ref out_of_range).402 | "array index '-' (3) is out of range" | ...
+    json.exception.[out_of_range](@ref out_of_range).403 | "key 'foo' not found" | ...
+    json.exception.[out_of_range](@ref out_of_range).404 | "unresolved reference token 'foo'" | ...
+    json.exception.[out_of_range](@ref out_of_range).401 | "" | ...
+    json.exception.[out_of_range](@ref out_of_range).401 | "" | ...
     */
     class exception : public std::exception
     {
@@ -345,6 +354,14 @@ class basic_json
       public:
         type_error(int id_, const std::string what_arg_)
             : exception(id_, "type_error", what_arg_)
+        {}
+    };
+
+    class out_of_range : public exception
+    {
+      public:
+        out_of_range(int id_, const std::string what_arg_)
+            : exception(id_, "out_of_range", what_arg_)
         {}
     };
 
@@ -1909,7 +1926,7 @@ class basic_json
     The semantics depends on the different types a JSON value can have:
     - In case of primitive types (number, boolean, or string), @a first must
       be `begin()` and @a last must be `end()`. In this case, the value is
-      copied. Otherwise, std::out_of_range is thrown.
+      copied. Otherwise, out_of_range is thrown.
     - In case of structured types (array, object), the constructor behaves as
       similar versions for `std::vector`.
     - In case of a null type, std::domain_error is thrown.
@@ -2994,7 +3011,7 @@ class basic_json
 
     @return copy of the JSON value, converted to type @a ValueType
 
-    @throw std::domain_error in case passed type @a ValueType is incompatible
+    @throw type_error in case passed type @a ValueType is incompatible
     to JSON; example: `"type must be object, but is null"`
 
     @complexity Linear in the size of the JSON value.
@@ -3258,7 +3275,7 @@ class basic_json
 
     @throw type_error if the JSON value is not an array; example:
     `"cannot use at() with string"`
-    @throw std::out_of_range if the index @a idx is out of range of the array;
+    @throw out_of_range if the index @a idx is out of range of the array;
     that is, `idx >= size()`; example: `"array index 7 is out of range"`
 
     @complexity Constant.
@@ -3280,7 +3297,7 @@ class basic_json
             JSON_CATCH(std::out_of_range&)
             {
                 // create better exception explanation
-                JSON_THROW(std::out_of_range("array index " + std::to_string(idx) + " is out of range"));
+                JSON_THROW(out_of_range(401, "array index " + std::to_string(idx) + " is out of range"));
             }
         }
         else
@@ -3301,7 +3318,7 @@ class basic_json
 
     @throw type_error if the JSON value is not an array; example:
     `"cannot use at() with string"`
-    @throw std::out_of_range if the index @a idx is out of range of the array;
+    @throw out_of_range if the index @a idx is out of range of the array;
     that is, `idx >= size()`; example: `"array index 7 is out of range"`
 
     @complexity Constant.
@@ -3323,7 +3340,7 @@ class basic_json
             JSON_CATCH (std::out_of_range&)
             {
                 // create better exception explanation
-                JSON_THROW(std::out_of_range("array index " + std::to_string(idx) + " is out of range"));
+                JSON_THROW(out_of_range(401, "array index " + std::to_string(idx) + " is out of range"));
             }
         }
         else
@@ -3344,7 +3361,7 @@ class basic_json
 
     @throw type_error if the JSON value is not an object; example:
     `"cannot use at() with boolean"`
-    @throw std::out_of_range if the key @a key is is not stored in the object;
+    @throw out_of_range if the key @a key is is not stored in the object;
     that is, `find(key) == end()`; example: `"key "the fast" not found"`
 
     @complexity Logarithmic in the size of the container.
@@ -3370,7 +3387,7 @@ class basic_json
             JSON_CATCH (std::out_of_range&)
             {
                 // create better exception explanation
-                JSON_THROW(std::out_of_range("key '" + key + "' not found"));
+                JSON_THROW(out_of_range(403, "key '" + key + "' not found"));
             }
         }
         else
@@ -3391,7 +3408,7 @@ class basic_json
 
     @throw type_error if the JSON value is not an object; example:
     `"cannot use at() with boolean"`
-    @throw std::out_of_range if the key @a key is is not stored in the object;
+    @throw out_of_range if the key @a key is is not stored in the object;
     that is, `find(key) == end()`; example: `"key "the fast" not found"`
 
     @complexity Logarithmic in the size of the container.
@@ -3417,7 +3434,7 @@ class basic_json
             JSON_CATCH(std::out_of_range&)
             {
                 // create better exception explanation
-                JSON_THROW(std::out_of_range("key '" + key + "' not found"));
+                JSON_THROW(out_of_range(403, "key '" + key + "' not found"));
             }
         }
         else
@@ -3776,7 +3793,7 @@ class basic_json
     @code {.cpp}
     try {
         return at(key);
-    } catch(std::out_of_range) {
+    } catch(out_of_range) {
         return default_value;
     }
     @endcode
@@ -3857,7 +3874,7 @@ class basic_json
     @code {.cpp}
     try {
         return at(ptr);
-    } catch(std::out_of_range) {
+    } catch(out_of_range) {
         return default_value;
     }
     @endcode
@@ -3900,7 +3917,7 @@ class basic_json
             {
                 return ptr.get_checked(this);
             }
-            JSON_CATCH (std::out_of_range&)
+            JSON_CATCH (out_of_range&)
             {
                 return default_value;
             }
@@ -3932,12 +3949,12 @@ class basic_json
 
     @complexity Constant.
 
-    @pre The JSON value must not be `null` (would throw `std::out_of_range`)
+    @pre The JSON value must not be `null` (would throw `out_of_range`)
     or an empty array or object (undefined behavior, **guarded by
     assertions**).
     @post The JSON value remains unchanged.
 
-    @throw std::out_of_range when called on `null` value
+    @throw out_of_range when called on `null` value
 
     @liveexample{The following code shows an example for `front()`.,front}
 
@@ -3975,12 +3992,12 @@ class basic_json
 
     @complexity Constant.
 
-    @pre The JSON value must not be `null` (would throw `std::out_of_range`)
+    @pre The JSON value must not be `null` (would throw `out_of_range`)
     or an empty array or object (undefined behavior, **guarded by
     assertions**).
     @post The JSON value remains unchanged.
 
-    @throw std::out_of_range when called on `null` value.
+    @throw out_of_range when called on `null` value.
 
     @liveexample{The following code shows an example for `back()`.,back}
 
@@ -4271,7 +4288,7 @@ class basic_json
 
     @throw type_error when called on a type other than JSON array;
     example: `"cannot use erase() with null"`
-    @throw std::out_of_range when `idx >= size()`; example: `"array index 17
+    @throw out_of_range when `idx >= size()`; example: `"array index 17
     is out of range"`
 
     @complexity Linear in distance between @a idx and the end of the container.
@@ -4293,7 +4310,7 @@ class basic_json
         {
             if (idx >= size())
             {
-                JSON_THROW(std::out_of_range("array index " + std::to_string(idx) + " is out of range"));
+                JSON_THROW(out_of_range(401, "array index " + std::to_string(idx) + " is out of range"));
             }
 
             m_value.array->erase(m_value.array->begin() + static_cast<difference_type>(idx));
@@ -7769,7 +7786,7 @@ class basic_json
         @return string representation of the code point; the length of the
         result string is between 1 and 4 characters.
 
-        @throw std::out_of_range if code point is > 0x10ffff; example: `"code
+        @throw parse_error if code point is > 0x10ffff; example: `"code
         points above 0x10FFFF are invalid"`
         @throw parse_error if the low surrogate is invalid; example:
         `""missing or wrong low surrogate""`
@@ -8119,7 +8136,7 @@ class basic_json
 
         @return string value of current token without opening and closing
         quotes
-        @throw std::out_of_range if to_unicode fails
+        @throw parse_error if to_unicode fails
         */
         string_t get_string() const
         {
@@ -8742,10 +8759,10 @@ class basic_json
                       empty string is assumed which references the whole JSON
                       value
 
-        @throw std::domain_error if reference token is nonempty and does not
+        @throw parse_error if reference token is nonempty and does not
         begin with a slash (`/`); example: `"JSON pointer must be empty or
         begin with /"`
-        @throw std::domain_error if a tilde (`~`) is not followed by `0`
+        @throw parse_error if a tilde (`~`) is not followed by `0`
         (representing `~`) or `1` (representing `/`); example: `"escape error:
         ~ must be followed with 0 or 1"`
 
@@ -8897,9 +8914,9 @@ class basic_json
 
         @complexity Linear in the length of the JSON pointer.
 
-        @throw std::out_of_range  if the JSON pointer can not be resolved
-        @throw std::domain_error  if an array index begins with '0'
-        @throw parse_error        if an array index was not a number
+        @throw out_of_range  if the JSON pointer can not be resolved
+        @throw parse_error   if an array index begins with '0'
+        @throw parse_error   if an array index was not a number
         */
         reference get_unchecked(pointer ptr) const
         {
@@ -8942,7 +8959,7 @@ class basic_json
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            JSON_THROW(std::domain_error("array index must not begin with '0'"));
+                            JSON_THROW(parse_error(106, 0, "array index must not begin with '0'"));
                         }
 
                         if (reference_token == "-")
@@ -8960,7 +8977,7 @@ class basic_json
 
                     default:
                     {
-                        JSON_THROW(std::out_of_range("unresolved reference token '" + reference_token + "'"));
+                        JSON_THROW(out_of_range(404, "unresolved reference token '" + reference_token + "'"));
                     }
                 }
             }
@@ -8986,15 +9003,15 @@ class basic_json
                         if (reference_token == "-")
                         {
                             // "-" always fails the range check
-                            JSON_THROW(std::out_of_range("array index '-' (" +
-                                                         std::to_string(ptr->m_value.array->size()) +
-                                                         ") is out of range"));
+                            JSON_THROW(out_of_range(402, "array index '-' (" +
+                                                    std::to_string(ptr->m_value.array->size()) +
+                                                    ") is out of range"));
                         }
 
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            JSON_THROW(std::domain_error("array index must not begin with '0'"));
+                            JSON_THROW(parse_error(106, 0, "array index must not begin with '0'"));
                         }
 
                         // note: at performs range check
@@ -9004,7 +9021,7 @@ class basic_json
 
                     default:
                     {
-                        JSON_THROW(std::out_of_range("unresolved reference token '" + reference_token + "'"));
+                        JSON_THROW(out_of_range(404, "unresolved reference token '" + reference_token + "'"));
                     }
                 }
             }
@@ -9038,15 +9055,15 @@ class basic_json
                         if (reference_token == "-")
                         {
                             // "-" cannot be used for const access
-                            JSON_THROW(std::out_of_range("array index '-' (" +
-                                                         std::to_string(ptr->m_value.array->size()) +
-                                                         ") is out of range"));
+                            JSON_THROW(out_of_range(402, "array index '-' (" +
+                                                    std::to_string(ptr->m_value.array->size()) +
+                                                    ") is out of range"));
                         }
 
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            JSON_THROW(std::domain_error("array index must not begin with '0'"));
+                            JSON_THROW(parse_error(106, 0, "array index must not begin with '0'"));
                         }
 
                         // use unchecked array access
@@ -9056,7 +9073,7 @@ class basic_json
 
                     default:
                     {
-                        JSON_THROW(std::out_of_range("unresolved reference token '" + reference_token + "'"));
+                        JSON_THROW(out_of_range(404, "unresolved reference token '" + reference_token + "'"));
                     }
                 }
             }
@@ -9082,15 +9099,15 @@ class basic_json
                         if (reference_token == "-")
                         {
                             // "-" always fails the range check
-                            JSON_THROW(std::out_of_range("array index '-' (" +
-                                                         std::to_string(ptr->m_value.array->size()) +
-                                                         ") is out of range"));
+                            JSON_THROW(out_of_range(402, "array index '-' (" +
+                                                    std::to_string(ptr->m_value.array->size()) +
+                                                    ") is out of range"));
                         }
 
                         // error condition (cf. RFC 6901, Sect. 4)
                         if (reference_token.size() > 1 and reference_token[0] == '0')
                         {
-                            JSON_THROW(std::domain_error("array index must not begin with '0'"));
+                            JSON_THROW(parse_error(106, 0, "array index must not begin with '0'"));
                         }
 
                         // note: at performs range check
@@ -9100,7 +9117,7 @@ class basic_json
 
                     default:
                     {
-                        JSON_THROW(std::out_of_range("unresolved reference token '" + reference_token + "'"));
+                        JSON_THROW(out_of_range(404, "unresolved reference token '" + reference_token + "'"));
                     }
                 }
             }
@@ -9122,7 +9139,7 @@ class basic_json
             // check if nonempty reference string begins with slash
             if (reference_string[0] != '/')
             {
-                JSON_THROW(std::domain_error("JSON pointer must be empty or begin with '/'"));
+                JSON_THROW(parse_error(107, 1, "JSON pointer must be empty or begin with '/'"));
             }
 
             // extract the reference tokens:
@@ -9157,7 +9174,7 @@ class basic_json
                             (reference_token[pos + 1] != '0' and
                              reference_token[pos + 1] != '1'))
                     {
-                        JSON_THROW(std::domain_error("escape error: '~' must be followed with '0' or '1'"));
+                        JSON_THROW(parse_error(108, 0, "escape character '~' must be followed with '0' or '1'"));
                     }
                 }
 
@@ -9346,9 +9363,9 @@ class basic_json
 
     @complexity Constant.
 
-    @throw std::out_of_range  if the JSON pointer can not be resolved
-    @throw std::domain_error  if an array index begins with '0'
-    @throw parse_error        if an array index was not a number
+    @throw out_of_range  if the JSON pointer can not be resolved
+    @throw parse_error   if an array index begins with '0'
+    @throw parse_error   if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,operatorjson_pointer}
 
@@ -9373,9 +9390,9 @@ class basic_json
 
     @complexity Constant.
 
-    @throw std::out_of_range  if the JSON pointer can not be resolved
-    @throw std::domain_error  if an array index begins with '0'
-    @throw parse_error        if an array index was not a number
+    @throw out_of_range  if the JSON pointer can not be resolved
+    @throw parse_error   if an array index begins with '0'
+    @throw parse_error   if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,operatorjson_pointer_const}
 
@@ -9398,9 +9415,9 @@ class basic_json
 
     @complexity Constant.
 
-    @throw std::out_of_range  if the JSON pointer can not be resolved
-    @throw std::domain_error  if an array index begins with '0'
-    @throw parse_error        if an array index was not a number
+    @throw out_of_range  if the JSON pointer can not be resolved
+    @throw parse_error   if an array index begins with '0'
+    @throw parse_error   if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,at_json_pointer}
 
@@ -9423,9 +9440,9 @@ class basic_json
 
     @complexity Constant.
 
-    @throw std::out_of_range  if the JSON pointer can not be resolved
-    @throw std::domain_error  if an array index begins with '0'
-    @throw parse_error        if an array index was not a number
+    @throw out_of_range  if the JSON pointer can not be resolved
+    @throw parse_error   if an array index begins with '0'
+    @throw parse_error   if an array index was not a number
 
     @liveexample{The behavior is shown in the example.,at_json_pointer_const}
 
@@ -9522,7 +9539,7 @@ class basic_json
           any case, the original value is not changed: the patch is applied
           to a copy of the value.
 
-    @throw std::out_of_range if a JSON pointer inside the patch could not
+    @throw out_of_range if a JSON pointer inside the patch could not
     be resolved successfully in the current JSON value; example: `"key baz
     not found"`
     @throw invalid_argument if the JSON patch is malformed (e.g., mandatory
@@ -9624,7 +9641,7 @@ class basic_json
                             if (static_cast<size_type>(idx) > parent.size())
                             {
                                 // avoid undefined behavior
-                                JSON_THROW(std::out_of_range("array index " + std::to_string(idx) + " is out of range"));
+                                JSON_THROW(out_of_range(401, "array index " + std::to_string(idx) + " is out of range"));
                             }
                             else
                             {
@@ -9662,7 +9679,7 @@ class basic_json
                 }
                 else
                 {
-                    JSON_THROW(std::out_of_range("key '" + last_path + "' not found"));
+                    JSON_THROW(out_of_range(403, "key '" + last_path + "' not found"));
                 }
             }
             else if (parent.is_array())
@@ -9777,7 +9794,7 @@ class basic_json
                         // the "path" location must exist - use at()
                         success = (result.at(ptr) == get_value("test", "value", false));
                     }
-                    JSON_CATCH(std::out_of_range&)
+                    JSON_CATCH(out_of_range&)
                     {
                         // ignore out of range errors: success remains false
                     }
