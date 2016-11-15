@@ -251,17 +251,17 @@ class basic_json
 
     name / id                      | massage | description
     ------------------------------ | ------- | -------------------------
-    json.exception.[parse_error](@ref parse_error).101 | "" | An unexpected token was read while deserializing a JSON text.
-    json.exception.[parse_error](@ref parse_error).102 | "" | An incomplete Unicode surrogate pair was read.
-    json.exception.[parse_error](@ref parse_error).103 | "" | A Unicode code point above 0x10FFFF was read.
-    json.exception.[parse_error](@ref parse_error).104 | "" | A JSON Patch must be an array of objects.
-    json.exception.[parse_error](@ref parse_error).105 | "" | A JSON Patch operation contained an error.
+    json.exception.[parse_error](@ref parse_error).101 | "parse error at 2: unexpected end of input; expected string literal" | An unexpected token was read while deserializing a JSON text.
+    json.exception.[parse_error](@ref parse_error).102 | "parse error at 14: missing or wrong low surrogate" | An incomplete Unicode surrogate pair was read.
+    json.exception.[parse_error](@ref parse_error).103 | "code points above 0x10FFFF are invalid" | A Unicode code point above 0x10FFFF was read.
+    json.exception.[parse_error](@ref parse_error).104 | "parse error: JSON patch must be an array of objects" | A JSON Patch must be an array of objects.
+    json.exception.[parse_error](@ref parse_error).105 | "parse error: operation must have string member 'op'" | A JSON Patch operation contained an error.
     json.exception.[parse_error](@ref parse_error).106 | "array index must not begin with '0'" | JSON Pointer
     json.exception.[parse_error](@ref parse_error).107 | "JSON pointer must be empty or begin with '/'" | JSON Pointer
     json.exception.[parse_error](@ref parse_error).108 | "escape character '~' must be followed with '0' or '1'" | JSON Pointer
-    json.exception.[invalid_iterator](@ref invalid_iterator).201 | "" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
-    json.exception.[invalid_iterator](@ref invalid_iterator).202 | "" | In an erase or insert function, the passed iterator @a pos does not belong to the JSON value for which the function was called. It hence does not define a valid position for the deletion/insertion.
-    json.exception.[invalid_iterator](@ref invalid_iterator).203 | "" | Either iterator passed to function @ref erase(InteratorType first, InteratorType last) does not belong to the JSON value from which values shall be erased. It hence does not define a valid range to delete values from.
+    json.exception.[invalid_iterator](@ref invalid_iterator).201 | "iterators are not compatible" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
+    json.exception.[invalid_iterator](@ref invalid_iterator).202 | "iterator does not fit current value" | In an erase or insert function, the passed iterator @a pos does not belong to the JSON value for which the function was called. It hence does not define a valid position for the deletion/insertion.
+    json.exception.[invalid_iterator](@ref invalid_iterator).203 | "iterators do not fit current value" | Either iterator passed to function @ref erase(InteratorType first, InteratorType last) does not belong to the JSON value from which values shall be erased. It hence does not define a valid range to delete values from.
     json.exception.[invalid_iterator](@ref invalid_iterator).204 | "iterators out of range" | When an iterator range for a primitive type (number, boolean, or string) is passed to a constructor or an erase function, this range has to be exactly (@ref begin(), @ref end()), because this is the only way the single stored value is expressed. All other ranges are invalid.
     json.exception.[invalid_iterator](@ref invalid_iterator).205 | "iterator out of range" | When an iterator for a primitive type (number, boolean, or string) is passed to an erase function, the iterator has to be the @ref begin() iterator, because it is the only way to address the stored value. All other iterators are invalid.
     json.exception.[invalid_iterator](@ref invalid_iterator).206 | "cannot construct with iterators from null" | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) belong to a JSON null value and hence to not define a valid range.
@@ -283,12 +283,13 @@ class basic_json
     json.exception.[type_error](@ref type_error).308 | "cannot use push_back() with string" | ...
     json.exception.[type_error](@ref type_error).309 | "cannot use insert() with" | ...
     json.exception.[type_error](@ref type_error).310 | "cannot use swap() with number" | ...
+    json.exception.[type_error](@ref type_error).313 | "invalid value to unflatten" | ...
+    json.exception.[type_error](@ref type_error).314 | "only objects can be unflattened" | ...
+    json.exception.[type_error](@ref type_error).315 | "values in object must be primitive" | ...
     json.exception.[out_of_range](@ref out_of_range).401 | "array index 3 is out of range" | ...
     json.exception.[out_of_range](@ref out_of_range).402 | "array index '-' (3) is out of range" | ...
     json.exception.[out_of_range](@ref out_of_range).403 | "key 'foo' not found" | ...
     json.exception.[out_of_range](@ref out_of_range).404 | "unresolved reference token 'foo'" | ...
-    json.exception.[out_of_range](@ref out_of_range).401 | "" | ...
-    json.exception.[out_of_range](@ref out_of_range).401 | "" | ...
     */
     class exception : public std::exception
     {
@@ -9743,7 +9744,7 @@ basic_json_parser_66:
                     */
                     default:
                     {
-                        JSON_THROW(std::domain_error("invalid value to unflatten"));
+                        JSON_THROW(type_error(313, "invalid value to unflatten"));
                     }
                 }
             }
@@ -10154,7 +10155,7 @@ basic_json_parser_66:
         {
             if (not value.is_object())
             {
-                JSON_THROW(std::domain_error("only objects can be unflattened"));
+                JSON_THROW(type_error(314, "only objects can be unflattened"));
             }
 
             basic_json result;
@@ -10164,7 +10165,7 @@ basic_json_parser_66:
             {
                 if (not element.second.is_primitive())
                 {
-                    JSON_THROW(std::domain_error("values in object must be primitive"));
+                    JSON_THROW(type_error(315, "values in object must be primitive"));
                 }
 
                 // assign value to reference pointed to by JSON pointer; Note
