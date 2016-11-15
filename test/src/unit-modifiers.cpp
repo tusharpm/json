@@ -519,14 +519,15 @@ TEST_CASE("modifiers")
             {
                 json j_other_array2 = {"first", "second"};
 
-                CHECK_THROWS_AS(j_array.insert(j_array.end(), j_array.begin(), j_array.end()), std::domain_error);
+                CHECK_THROWS_AS(j_array.insert(j_array.end(), j_array.begin(), j_array.end()),
+                                json::invalid_iterator);
                 CHECK_THROWS_AS(j_array.insert(j_array.end(), j_other_array.begin(), j_other_array2.end()),
-                                std::domain_error);
+                                json::invalid_iterator);
 
                 CHECK_THROWS_WITH(j_array.insert(j_array.end(), j_array.begin(), j_array.end()),
-                                  "passed iterators may not belong to container");
+                                  "[json.exception.invalid_iterator.211] passed iterators may not belong to container");
                 CHECK_THROWS_WITH(j_array.insert(j_array.end(), j_other_array.begin(), j_other_array2.end()),
-                                  "iterators do not fit");
+                                  "[json.exception.invalid_iterator.210] iterators do not fit");
             }
         }
 
@@ -565,22 +566,24 @@ TEST_CASE("modifiers")
             // pass iterator to a different array
             json j_another_array = {1, 2};
             json j_yet_another_array = {"first", "second"};
-            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), 10), std::domain_error);
-            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), j_value), std::domain_error);
-            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), 10, 11), std::domain_error);
+            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), 10), json::invalid_iterator);
+            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), j_value), json::invalid_iterator);
+            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), 10, 11), json::invalid_iterator);
             CHECK_THROWS_AS(j_array.insert(j_another_array.end(), j_yet_another_array.begin(),
-                                           j_yet_another_array.end()), std::domain_error);
-            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), {1, 2, 3, 4}), std::domain_error);
+                                           j_yet_another_array.end()), json::invalid_iterator);
+            CHECK_THROWS_AS(j_array.insert(j_another_array.end(), {1, 2, 3, 4}), json::invalid_iterator);
 
-            CHECK_THROWS_WITH(j_array.insert(j_another_array.end(), 10), "iterator does not fit current value");
+            CHECK_THROWS_WITH(j_array.insert(j_another_array.end(), 10),
+                              "[json.exception.invalid_iterator.202] iterator does not fit current value");
             CHECK_THROWS_WITH(j_array.insert(j_another_array.end(), j_value),
-                              "iterator does not fit current value");
+                              "[json.exception.invalid_iterator.202] iterator does not fit current value");
             CHECK_THROWS_WITH(j_array.insert(j_another_array.end(), 10, 11),
-                              "iterator does not fit current value");
+                              "[json.exception.invalid_iterator.202] iterator does not fit current value");
             CHECK_THROWS_WITH(j_array.insert(j_another_array.end(), j_yet_another_array.begin(),
-                                             j_yet_another_array.end()), "iterator does not fit current value");
+                                             j_yet_another_array.end()),
+                              "[json.exception.invalid_iterator.202] iterator does not fit current value");
             CHECK_THROWS_WITH(j_array.insert(j_another_array.end(), {1, 2, 3, 4}),
-                              "iterator does not fit current value");
+                              "[json.exception.invalid_iterator.202] iterator does not fit current value");
         }
 
         SECTION("non-array type")
