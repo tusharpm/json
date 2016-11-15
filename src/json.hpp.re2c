@@ -269,7 +269,18 @@ class basic_json
     211 | json.exception.invalid_iterator.211 | "passed iterators may not belong to container" | The iterator range passed to the insert function must not be a subrange of the container to insert to.
     212 | json.exception.invalid_iterator.212 | "cannot compare iterators of different containers" | When two iterators are compared, they must belong to the same container.
     213 | json.exception.invalid_iterator.213 | "cannot compare order of object iterators" | The order of object iterators cannot be compated, because JSON objects are unordered.
-    214 | json.exception.invalid_iterator.214 | "cannot get value" | Cannot get value for iterator: Either the iterator belongs to a null value or it is an iterator to a primitive type (number, boolean, or string), but the iterator is different to @ref begin().    */
+    214 | json.exception.invalid_iterator.214 | "cannot get value" | Cannot get value for iterator: Either the iterator belongs to a null value or it is an iterator to a primitive type (number, boolean, or string), but the iterator is different to @ref begin().
+    301 | json.exception.type_error.301 | "cannot create object from initializer list" | ...
+    302 | json.exception.type_error.302 | "type must be object, but is array" | ...
+    303 | json.exception.type_error.303 | "incompatible ReferenceType for get_ref, actual type is object" |
+    304 | json.exception.type_error.304 | "cannot use at() with string" |
+    305 | json.exception.type_error.305 | "cannot use operator[] with string" |
+    306 | json.exception.type_error.306 | "cannot use value() with string" |
+    307 | json.exception.type_error.307 | "cannot use erase() with string" |
+    308 | json.exception.type_error.308 | "cannot use push_back() with string" |
+    309 | json.exception.type_error.309 | "cannot use insert() with" |
+    310 | json.exception.type_error.310 | "cannot use swap() with number" |
+    */
     class exception : public std::exception
     {
       public:
@@ -326,6 +337,14 @@ class basic_json
       public:
         invalid_iterator(int id_, const std::string what_arg_)
             : exception(id_, "invalid_iterator", what_arg_)
+        {}
+    };
+
+    class type_error : public exception
+    {
+      public:
+        type_error(int id_, const std::string what_arg_)
+            : exception(id_, "type_error", what_arg_)
         {}
     };
 
@@ -1712,8 +1731,8 @@ class basic_json
     value_t::array and @ref value_t::object are valid); when @a type_deduction
     is set to `true`, this parameter has no effect
 
-    @throw std::domain_error if @a type_deduction is `false`, @a manual_type
-    is `value_t::object`, but @a init contains an element which is not a pair
+    @throw type_error if @a type_deduction is `false`, @a manual_type is
+    `value_t::object`, but @a init contains an element which is not a pair
     whose first element is a string; example: `"cannot create object from
     initializer list"`
 
@@ -1753,7 +1772,7 @@ class basic_json
             // if object is wanted but impossible, throw an exception
             if (manual_type == value_t::object and not is_an_object)
             {
-                JSON_THROW(std::domain_error("cannot create object from initializer list"));
+                JSON_THROW(type_error(301, "cannot create object from initializer list"));
             }
         }
 
@@ -1836,7 +1855,7 @@ class basic_json
 
     @return JSON object value
 
-    @throw std::domain_error if @a init is not a pair whose first elements are
+    @throw type_error if @a init is not a pair whose first elements are
     strings; thrown by
     @ref basic_json(std::initializer_list<basic_json>, bool, value_t)
 
@@ -2692,7 +2711,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be object, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be object, but is " + type_name()));
         }
     }
 
@@ -2705,7 +2724,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be object, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be object, but is " + type_name()));
         }
     }
 
@@ -2730,7 +2749,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be array, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be array, but is " + type_name()));
         }
     }
 
@@ -2753,7 +2772,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be array, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be array, but is " + type_name()));
         }
     }
 
@@ -2769,7 +2788,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be array, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be array, but is " + type_name()));
         }
     }
 
@@ -2782,7 +2801,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be array, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be array, but is " + type_name()));
         }
     }
 
@@ -2797,7 +2816,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be string, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be string, but is " + type_name()));
         }
     }
 
@@ -2825,7 +2844,7 @@ class basic_json
 
             default:
             {
-                JSON_THROW(std::domain_error("type must be number, but is " + type_name()));
+                JSON_THROW(type_error(302, "type must be number, but is " + type_name()));
             }
         }
     }
@@ -2839,7 +2858,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("type must be boolean, but is " + type_name()));
+            JSON_THROW(type_error(302, "type must be boolean, but is " + type_name()));
         }
     }
 
@@ -2935,7 +2954,7 @@ class basic_json
 
     @tparam ThisType will be deduced as `basic_json` or `const basic_json`
 
-    @throw std::domain_error if ReferenceType does not match underlying value
+    @throw type_error if ReferenceType does not match underlying value
     type of the current JSON
     */
     template<typename ReferenceType, typename ThisType>
@@ -2953,8 +2972,8 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("incompatible ReferenceType for get_ref, actual type is " +
-                                         obj.type_name()));
+            JSON_THROW(type_error(303, "incompatible ReferenceType for get_ref, actual type is " +
+                                  obj.type_name()));
         }
     }
 
@@ -3143,9 +3162,9 @@ class basic_json
 
     @return reference to the internally stored JSON value if the requested
     reference type @a ReferenceType fits to the JSON value; throws
-    std::domain_error otherwise
+    type_error otherwise
 
-    @throw std::domain_error in case passed type @a ReferenceType is
+    @throw type_error in case passed type @a ReferenceType is
     incompatible with the stored JSON value
 
     @complexity Constant.
@@ -3189,7 +3208,7 @@ class basic_json
 
     @return copy of the JSON value, converted to type @a ValueType
 
-    @throw std::domain_error in case passed type @a ValueType is incompatible
+    @throw type_error in case passed type @a ValueType is incompatible
     to JSON, thrown by @ref get() const
 
     @complexity Linear in the size of the JSON value.
@@ -3237,7 +3256,7 @@ class basic_json
 
     @return reference to the element at index @a idx
 
-    @throw std::domain_error if the JSON value is not an array; example:
+    @throw type_error if the JSON value is not an array; example:
     `"cannot use at() with string"`
     @throw std::out_of_range if the index @a idx is out of range of the array;
     that is, `idx >= size()`; example: `"array index 7 is out of range"`
@@ -3266,7 +3285,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use at() with " + type_name()));
+            JSON_THROW(type_error(304, "cannot use at() with " + type_name()));
         }
     }
 
@@ -3280,7 +3299,7 @@ class basic_json
 
     @return const reference to the element at index @a idx
 
-    @throw std::domain_error if the JSON value is not an array; example:
+    @throw type_error if the JSON value is not an array; example:
     `"cannot use at() with string"`
     @throw std::out_of_range if the index @a idx is out of range of the array;
     that is, `idx >= size()`; example: `"array index 7 is out of range"`
@@ -3309,7 +3328,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use at() with " + type_name()));
+            JSON_THROW(type_error(304, "cannot use at() with " + type_name()));
         }
     }
 
@@ -3323,7 +3342,7 @@ class basic_json
 
     @return reference to the element at key @a key
 
-    @throw std::domain_error if the JSON value is not an object; example:
+    @throw type_error if the JSON value is not an object; example:
     `"cannot use at() with boolean"`
     @throw std::out_of_range if the key @a key is is not stored in the object;
     that is, `find(key) == end()`; example: `"key "the fast" not found"`
@@ -3356,7 +3375,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use at() with " + type_name()));
+            JSON_THROW(type_error(304, "cannot use at() with " + type_name()));
         }
     }
 
@@ -3370,7 +3389,7 @@ class basic_json
 
     @return const reference to the element at key @a key
 
-    @throw std::domain_error if the JSON value is not an object; example:
+    @throw type_error if the JSON value is not an object; example:
     `"cannot use at() with boolean"`
     @throw std::out_of_range if the key @a key is is not stored in the object;
     that is, `find(key) == end()`; example: `"key "the fast" not found"`
@@ -3403,7 +3422,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use at() with " + type_name()));
+            JSON_THROW(type_error(304, "cannot use at() with " + type_name()));
         }
     }
 
@@ -3420,7 +3439,7 @@ class basic_json
 
     @return reference to the element at index @a idx
 
-    @throw std::domain_error if JSON is not an array or null; example:
+    @throw type_erro if JSON is not an array or null; example:
     `"cannot use operator[] with string"`
 
     @complexity Constant if @a idx is in the range of the array. Otherwise
@@ -3457,7 +3476,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use operator[] with " + type_name()));
+            JSON_THROW(type_error(305, "cannot use operator[] with " + type_name()));
         }
     }
 
@@ -3470,7 +3489,7 @@ class basic_json
 
     @return const reference to the element at index @a idx
 
-    @throw std::domain_error if JSON is not an array; example: `"cannot use
+    @throw type_error if JSON is not an array; example: `"cannot use
     operator[] with null"`
 
     @complexity Constant.
@@ -3489,7 +3508,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use operator[] with " + type_name()));
+            JSON_THROW(type_error(305, "cannot use operator[] with " + type_name()));
         }
     }
 
@@ -3506,7 +3525,7 @@ class basic_json
 
     @return reference to the element at key @a key
 
-    @throw std::domain_error if JSON is not an object or null; example:
+    @throw type_error if JSON is not an object or null; example:
     `"cannot use operator[] with string"`
 
     @complexity Logarithmic in the size of the container.
@@ -3537,7 +3556,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use operator[] with " + type_name()));
+            JSON_THROW(type_error(305, "cannot use operator[] with " + type_name()));
         }
     }
 
@@ -3557,7 +3576,7 @@ class basic_json
     @pre The element with key @a key must exist. **This precondition is
          enforced with an assertion.**
 
-    @throw std::domain_error if JSON is not an object; example: `"cannot use
+    @throw type_error if JSON is not an object; example: `"cannot use
     operator[] with null"`
 
     @complexity Logarithmic in the size of the container.
@@ -3581,7 +3600,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use operator[] with " + type_name()));
+            JSON_THROW(type_error(305, "cannot use operator[] with " + type_name()));
         }
     }
 
@@ -3598,7 +3617,7 @@ class basic_json
 
     @return reference to the element at key @a key
 
-    @throw std::domain_error if JSON is not an object or null; example:
+    @throw type_error if JSON is not an object or null; example:
     `"cannot use operator[] with string"`
 
     @complexity Logarithmic in the size of the container.
@@ -3633,7 +3652,7 @@ class basic_json
 
     @return const reference to the element at key @a key
 
-    @throw std::domain_error if JSON is not an object; example: `"cannot use
+    @throw type_error if JSON is not an object; example: `"cannot use
     operator[] with null"`
 
     @complexity Logarithmic in the size of the container.
@@ -3666,7 +3685,7 @@ class basic_json
 
     @return reference to the element at key @a key
 
-    @throw std::domain_error if JSON is not an object or null; example:
+    @throw type_error if JSON is not an object or null; example:
     `"cannot use operator[] with string"`
 
     @complexity Logarithmic in the size of the container.
@@ -3698,7 +3717,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use operator[] with " + type_name()));
+            JSON_THROW(type_error(305, "cannot use operator[] with " + type_name()));
         }
     }
 
@@ -3718,7 +3737,7 @@ class basic_json
     @pre The element with key @a key must exist. **This precondition is
          enforced with an assertion.**
 
-    @throw std::domain_error if JSON is not an object; example: `"cannot use
+    @throw type_error if JSON is not an object; example: `"cannot use
     operator[] with null"`
 
     @complexity Logarithmic in the size of the container.
@@ -3743,7 +3762,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use operator[] with " + type_name()));
+            JSON_THROW(type_error(305, "cannot use operator[] with " + type_name()));
         }
     }
 
@@ -3780,7 +3799,7 @@ class basic_json
     @return copy of the element at key @a key or @a default_value if @a key
     is not found
 
-    @throw std::domain_error if JSON is not an object; example: `"cannot use
+    @throw type_error if JSON is not an object; example: `"cannot use
     value() with null"`
 
     @complexity Logarithmic in the size of the container.
@@ -3815,7 +3834,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use value() with " + type_name()));
+            JSON_THROW(type_error(306, "cannot use value() with " + type_name()));
         }
     }
 
@@ -3857,7 +3876,7 @@ class basic_json
     @return copy of the element at key @a key or @a default_value if @a key
     is not found
 
-    @throw std::domain_error if JSON is not an object; example: `"cannot use
+    @throw type_error if JSON is not an object; example: `"cannot use
     value() with null"`
 
     @complexity Logarithmic in the size of the container.
@@ -3888,7 +3907,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use value() with " + type_name()));
+            JSON_THROW(type_error(306, "cannot use value() with " + type_name()));
         }
     }
 
@@ -4005,7 +4024,7 @@ class basic_json
     @post Invalidates iterators and references at or after the point of the
     erase, including the `end()` iterator.
 
-    @throw std::domain_error if called on a `null` value; example: `"cannot
+    @throw type_error if called on a `null` value; example: `"cannot
     use erase() with null"`
     @throw invalid_iterator if called on an iterator which does not belong to
     the current JSON value; example: `"iterator does not fit current value"`
@@ -4085,7 +4104,7 @@ class basic_json
 
             default:
             {
-                JSON_THROW(std::domain_error("cannot use erase() with " + type_name()));
+                JSON_THROW(type_error(307, "cannot use erase() with " + type_name()));
             }
         }
 
@@ -4112,7 +4131,7 @@ class basic_json
     @post Invalidates iterators and references at or after the point of the
     erase, including the `end()` iterator.
 
-    @throw std::domain_error if called on a `null` value; example: `"cannot
+    @throw type_error if called on a `null` value; example: `"cannot
     use erase() with null"`
     @throw invalid_iterator if called on iterators which does not belong to
     the current JSON value; example: `"iterators do not fit current value"`
@@ -4194,7 +4213,7 @@ class basic_json
 
             default:
             {
-                JSON_THROW(std::domain_error("cannot use erase() with " + type_name()));
+                JSON_THROW(type_error(307, "cannot use erase() with " + type_name()));
             }
         }
 
@@ -4215,7 +4234,7 @@ class basic_json
     @post References and iterators to the erased elements are invalidated.
     Other references and iterators are not affected.
 
-    @throw std::domain_error when called on a type other than JSON object;
+    @throw type_error when called on a type other than JSON object;
     example: `"cannot use erase() with null"`
 
     @complexity `log(size()) + count(key)`
@@ -4239,7 +4258,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use erase() with " + type_name()));
+            JSON_THROW(type_error(307, "cannot use erase() with " + type_name()));
         }
     }
 
@@ -4250,7 +4269,7 @@ class basic_json
 
     @param[in] idx index of the element to remove
 
-    @throw std::domain_error when called on a type other than JSON array;
+    @throw type_error when called on a type other than JSON array;
     example: `"cannot use erase() with null"`
     @throw std::out_of_range when `idx >= size()`; example: `"array index 17
     is out of range"`
@@ -4281,7 +4300,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use erase() with " + type_name()));
+            JSON_THROW(type_error(307, "cannot use erase() with " + type_name()));
         }
     }
 
@@ -4979,7 +4998,7 @@ class basic_json
 
     @param[in] val the value to add to the JSON array
 
-    @throw std::domain_error when called on a type other than JSON array or
+    @throw type_error when called on a type other than JSON array or
     null; example: `"cannot use push_back() with number"`
 
     @complexity Amortized constant.
@@ -4995,7 +5014,7 @@ class basic_json
         // push_back only works for null objects or arrays
         if (not(is_null() or is_array()))
         {
-            JSON_THROW(std::domain_error("cannot use push_back() with " + type_name()));
+            JSON_THROW(type_error(308, "cannot use push_back() with " + type_name()));
         }
 
         // transform null object into an array
@@ -5031,7 +5050,7 @@ class basic_json
         // push_back only works for null objects or arrays
         if (not(is_null() or is_array()))
         {
-            JSON_THROW(std::domain_error("cannot use push_back() with " + type_name()));
+            JSON_THROW(type_error(308, "cannot use push_back() with " + type_name()));
         }
 
         // transform null object into an array
@@ -5065,7 +5084,7 @@ class basic_json
 
     @param[in] val the value to add to the JSON object
 
-    @throw std::domain_error when called on a type other than JSON object or
+    @throw type_error when called on a type other than JSON object or
     null; example: `"cannot use push_back() with number"`
 
     @complexity Logarithmic in the size of the container, O(log(`size()`)).
@@ -5081,7 +5100,7 @@ class basic_json
         // push_back only works for null objects or objects
         if (not(is_null() or is_object()))
         {
-            JSON_THROW(std::domain_error("cannot use push_back() with " + type_name()));
+            JSON_THROW(type_error(308, "cannot use push_back() with " + type_name()));
         }
 
         // transform null object into an object
@@ -5164,7 +5183,7 @@ class basic_json
     @param[in] val element to insert
     @return iterator pointing to the inserted @a val.
 
-    @throw std::domain_error if called on JSON values other than arrays;
+    @throw type_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
     @throw invalid_iterator if @a pos is not an iterator of *this; example:
     `"iterator does not fit current value"`
@@ -5194,7 +5213,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use insert() with " + type_name()));
+            JSON_THROW(type_error(309, "cannot use insert() with " + type_name()));
         }
     }
 
@@ -5219,7 +5238,7 @@ class basic_json
     @return iterator pointing to the first element inserted, or @a pos if
     `cnt==0`
 
-    @throw std::domain_error if called on JSON values other than arrays;
+    @throw type_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
     @throw invalid_iterator if @a pos is not an iterator of *this; example:
     `"iterator does not fit current value"`
@@ -5249,7 +5268,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use insert() with " + type_name()));
+            JSON_THROW(type_error(309, "cannot use insert() with " + type_name()));
         }
     }
 
@@ -5263,7 +5282,7 @@ class basic_json
     @param[in] first begin of the range of elements to insert
     @param[in] last end of the range of elements to insert
 
-    @throw std::domain_error if called on JSON values other than arrays;
+    @throw type_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
     @throw invalid_iterator if @a pos is not an iterator of *this; example:
     `"iterator does not fit current value"`
@@ -5288,7 +5307,7 @@ class basic_json
         // insert only works for arrays
         if (not is_array())
         {
-            JSON_THROW(std::domain_error("cannot use insert() with " + type_name()));
+            JSON_THROW(type_error(309, "cannot use insert() with " + type_name()));
         }
 
         // check if iterator pos fits to this JSON value
@@ -5326,7 +5345,7 @@ class basic_json
     the end() iterator
     @param[in] ilist initializer list to insert the values from
 
-    @throw std::domain_error if called on JSON values other than arrays;
+    @throw type_error if called on JSON values other than arrays;
     example: `"cannot use insert() with string"`
     @throw invalid_iterator if @a pos is not an iterator of *this; example:
     `"iterator does not fit current value"`
@@ -5346,7 +5365,7 @@ class basic_json
         // insert only works for arrays
         if (not is_array())
         {
-            JSON_THROW(std::domain_error("cannot use insert() with " + type_name()));
+            JSON_THROW(type_error(309, "cannot use insert() with " + type_name()));
         }
 
         // check if iterator pos fits to this JSON value
@@ -5400,7 +5419,7 @@ class basic_json
 
     @param[in,out] other array to exchange the contents with
 
-    @throw std::domain_error when JSON value is not an array; example: `"cannot
+    @throw type_error when JSON value is not an array; example: `"cannot
     use swap() with string"`
 
     @complexity Constant.
@@ -5419,7 +5438,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use swap() with " + type_name()));
+            JSON_THROW(type_error(310, "cannot use swap() with " + type_name()));
         }
     }
 
@@ -5433,7 +5452,7 @@ class basic_json
 
     @param[in,out] other object to exchange the contents with
 
-    @throw std::domain_error when JSON value is not an object; example:
+    @throw type_error when JSON value is not an object; example:
     `"cannot use swap() with string"`
 
     @complexity Constant.
@@ -5452,7 +5471,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use swap() with " + type_name()));
+            JSON_THROW(type_error(310, "cannot use swap() with " + type_name()));
         }
     }
 
@@ -5466,7 +5485,7 @@ class basic_json
 
     @param[in,out] other string to exchange the contents with
 
-    @throw std::domain_error when JSON value is not a string; example: `"cannot
+    @throw type_error when JSON value is not a string; example: `"cannot
     use swap() with boolean"`
 
     @complexity Constant.
@@ -5485,7 +5504,7 @@ class basic_json
         }
         else
         {
-            JSON_THROW(std::domain_error("cannot use swap() with " + type_name()));
+            JSON_THROW(type_error(310, "cannot use swap() with " + type_name()));
         }
     }
 
