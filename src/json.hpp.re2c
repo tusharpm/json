@@ -50,7 +50,7 @@ SOFTWARE.
 #include <memory> // addressof, allocator, allocator_traits, unique_ptr
 #include <numeric> // accumulate
 #include <sstream> // stringstream
-#include <stdexcept> // domain_error, out_of_range
+#include <stdexcept> // out_of_range
 #include <string> // getline, stoi, string, to_string
 #include <type_traits> // add_pointer, enable_if, is_arithmetic, is_base_of, is_const, is_constructible, is_convertible, is_floating_point, is_integral, is_nothrow_move_assignable, std::is_nothrow_move_constructible, std::is_pointer, std::is_reference, std::is_same, remove_const, remove_pointer, remove_reference
 #include <utility> // declval, forward, make_pair, move, pair, swap
@@ -292,6 +292,8 @@ class basic_json
     json.exception.[out_of_range](@ref out_of_range).402 | "array index '-' (3) is out of range" | ...
     json.exception.[out_of_range](@ref out_of_range).403 | "key 'foo' not found" | ...
     json.exception.[out_of_range](@ref out_of_range).404 | "unresolved reference token 'foo'" | ...
+    json.exception.[out_of_range](@ref out_of_range).405 | "JSON pointer has no parent" | The JSON Patch operations 'remove' and 'add' can not be applied to the root element of the JSON value.
+    json.exception.other.500 | "unsuccessful" | A JSON Patch operation 'test' failed.
 
     @since version 3.0.0
     */
@@ -1960,7 +1962,7 @@ class basic_json
       copied. Otherwise, out_of_range is thrown.
     - In case of structured types (array, object), the constructor behaves as
       similar versions for `std::vector`.
-    - In case of a null type, std::domain_error is thrown.
+    - In case of a null type, @ref invalid_iterator is thrown.
 
     @tparam InputIT an input iterator type (@ref iterator or @ref
     const_iterator)
@@ -8846,7 +8848,7 @@ class basic_json
         {
             if (is_root())
             {
-                JSON_THROW(std::domain_error("JSON pointer has no parent"));
+                JSON_THROW(out_of_range(405, "JSON pointer has no parent"));
             }
 
             auto last = reference_tokens.back();
@@ -8864,7 +8866,7 @@ class basic_json
         {
             if (is_root())
             {
-                JSON_THROW(std::domain_error("JSON pointer has no parent"));
+                JSON_THROW(out_of_range(405, "JSON pointer has no parent"));
             }
 
             json_pointer result = *this;
@@ -9834,10 +9836,10 @@ class basic_json
                         // ignore out of range errors: success remains false
                     }
 
-                    // JSON_THROW(an exception if test fails);
+                    // throw an exception if test fails
                     if (not success)
                     {
-                        JSON_THROW(std::domain_error("unsuccessful: " + val.dump()));
+                        JSON_THROW(exception(500, "other", "unsuccessful: " + val.dump()));
                     }
 
                     break;

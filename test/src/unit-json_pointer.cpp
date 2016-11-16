@@ -49,10 +49,12 @@ TEST_CASE("JSON pointers")
                           "[json.exception.parse_error.108] parse error: escape character '~' must be followed with '0' or '1'");
 
         json::json_pointer p;
-        CHECK_THROWS_AS(p.top(), std::domain_error);
-        CHECK_THROWS_WITH(p.top(), "JSON pointer has no parent");
-        CHECK_THROWS_AS(p.pop_back(), std::domain_error);
-        CHECK_THROWS_WITH(p.pop_back(), "JSON pointer has no parent");
+        CHECK_THROWS_AS(p.top(), json::out_of_range);
+        CHECK_THROWS_WITH(p.top(),
+                          "[json.exception.out_of_range.405] JSON pointer has no parent");
+        CHECK_THROWS_AS(p.pop_back(), json::out_of_range);
+        CHECK_THROWS_WITH(p.pop_back(),
+                          "[json.exception.out_of_range.405] JSON pointer has no parent");
     }
 
     SECTION("examples from RFC 6901")

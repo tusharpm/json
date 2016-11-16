@@ -336,8 +336,8 @@ TEST_CASE("JSON patch")
                 )"_json;
 
             // check that evaluation throws
-            CHECK_THROWS_AS(doc.patch(patch), std::domain_error);
-            CHECK_THROWS_WITH(doc.patch(patch), "unsuccessful: " + patch[0].dump());
+            CHECK_THROWS_AS(doc.patch(patch), json::exception);
+            CHECK_THROWS_WITH(doc.patch(patch), "[json.exception.other.500] unsuccessful: " + patch[0].dump());
         }
 
         SECTION("A.10. Adding a Nested Member Object")
@@ -476,8 +476,8 @@ TEST_CASE("JSON patch")
                 )"_json;
 
             // check that evaluation throws
-            CHECK_THROWS_AS(doc.patch(patch), std::domain_error);
-            CHECK_THROWS_WITH(doc.patch(patch), "unsuccessful: " + patch[0].dump());
+            CHECK_THROWS_AS(doc.patch(patch), json::exception);
+            CHECK_THROWS_WITH(doc.patch(patch), "[json.exception.other.500] unsuccessful: " + patch[0].dump());
         }
 
         SECTION("A.16. Adding an Array Value")
@@ -788,8 +788,9 @@ TEST_CASE("JSON patch")
             {
                 json j = "string";
                 json patch = {{{"op", "remove"}, {"path", ""}}};
-                CHECK_THROWS_AS(j.patch(patch), std::domain_error);
-                CHECK_THROWS_WITH(j.patch(patch), "JSON pointer has no parent");
+                CHECK_THROWS_AS(j.patch(patch), json::out_of_range);
+                CHECK_THROWS_WITH(j.patch(patch),
+                                  "[json.exception.out_of_range.405] JSON pointer has no parent");
             }
         }
 
@@ -1170,8 +1171,8 @@ TEST_CASE("JSON patch")
                 )"_json;
 
                 // the test will fail
-                CHECK_THROWS_AS(doc.patch(patch), std::domain_error);
-                CHECK_THROWS_WITH(doc.patch(patch), "unsuccessful: " + patch[0].dump());
+                CHECK_THROWS_AS(doc.patch(patch), json::exception);
+                CHECK_THROWS_WITH(doc.patch(patch), "[json.exception.other.500] unsuccessful: " + patch[0].dump());
             }
         }
     }
