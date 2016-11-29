@@ -396,6 +396,12 @@ TEST_CASE("JSON pointers")
         CHECK_THROWS_WITH(j_error.unflatten(),
                           "[json.exception.type_error.313] invalid value to unflatten");
 
+        // error for invalid array index
+        json j_error_2 = {{"/list/0", 1}, {"/list/2", 2}, {"/list/three", 3}};
+        CHECK_THROWS_AS(j_error_2.unflatten(), json::parse_error);
+        CHECK_THROWS_WITH(j_error_2.unflatten(),
+                          "[json.exception.parse_error.109] parse error: array index 'three' is not a number");
+
         // explicit roundtrip check
         CHECK(j.flatten().unflatten() == j);
 
