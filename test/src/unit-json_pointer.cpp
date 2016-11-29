@@ -269,8 +269,17 @@ TEST_CASE("JSON pointers")
                               "[json.exception.parse_error.106] parse error: array index must not begin with '0'");
 
             // error with incorrect numbers
-            CHECK_THROWS_AS(j["/one"_json_pointer] = 1, json::parse_error);
-            CHECK_THROWS_WITH(j["/one"_json_pointer] = 1,
+            CHECK_THROWS_AS(j["/one"_json_pointer], json::parse_error);
+            CHECK_THROWS_WITH(j["/one"_json_pointer],
+                              "[json.exception.parse_error.109] parse error: array index 'one' is not a number");
+            CHECK_THROWS_AS(j_const["/one"_json_pointer], json::parse_error);
+            CHECK_THROWS_WITH(j_const["/one"_json_pointer],
+                              "[json.exception.parse_error.109] parse error: array index 'one' is not a number");
+            CHECK_THROWS_AS(j.at("/one"_json_pointer), json::parse_error);
+            CHECK_THROWS_WITH(j.at("/one"_json_pointer),
+                              "[json.exception.parse_error.109] parse error: array index 'one' is not a number");
+            CHECK_THROWS_AS(j_const.at("/one"_json_pointer), json::parse_error);
+            CHECK_THROWS_WITH(j_const.at("/one"_json_pointer),
                               "[json.exception.parse_error.109] parse error: array index 'one' is not a number");
 
             // assign to "-"
