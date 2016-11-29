@@ -513,7 +513,7 @@ TEST_CASE("regression tests")
         // ss is not at EOF; this yielded an error before the fix
         // (threw basic_string::append). No, it should just throw
         // a parse error because of the EOF.
-        CHECK_THROWS_AS(j << ss, std::invalid_argument);
-        CHECK_THROWS_WITH(j << ss, "parse error - unexpected end of input");
+        CHECK_THROWS_AS(j << ss, json::parse_error);
+        CHECK_THROWS_WITH(j << ss, "[json.exception.parse_error.101] parse error at 1: unexpected end of input");
     }
 }
